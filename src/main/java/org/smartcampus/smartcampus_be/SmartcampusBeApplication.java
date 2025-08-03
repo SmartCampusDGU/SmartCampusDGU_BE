@@ -1,0 +1,13 @@
+package org.smartcampus.smartcampus_be;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class SmartcampusBeApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(SmartcampusBeApplication.class, args);
+	}
+
+}
