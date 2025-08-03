@@ -1,5 +1,6 @@
 package org.smartcampus.smartcampus_be.domain.member.Controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.smartcampus.smartcampus_be.domain.member.dto.LoginRequestDto;
@@ -23,6 +24,11 @@ public class MemberController {
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponseDto>> login(@RequestBody @Valid LoginRequestDto request) {
         return ResponseEntity.ok(ApiResponse.success(SuccessType.LOGIN_SUCCESS, memberService.login(request)));
+    }
+
+    @PostMapping("/log-out")
+    public ResponseEntity<ApiResponse<String>> logout(HttpServletRequest request) {
+        return ResponseEntity.ok((ApiResponse<String>) ApiResponse.success(SuccessType.LOGOUT_SUCCESS));
     }
 }
 
