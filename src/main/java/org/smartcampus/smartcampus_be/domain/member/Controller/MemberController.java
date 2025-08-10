@@ -12,6 +12,7 @@ import org.smartcampus.smartcampus_be.global.response.ApiResponse;
 import org.smartcampus.smartcampus_be.global.response.SuccessType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,6 +35,7 @@ public class MemberController {
         return ResponseEntity.ok((ApiResponse<String>) ApiResponse.success(SuccessType.LOGOUT_SUCCESS));
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/members")
     public ResponseEntity<ApiResponse<MemberCreateResponseDto>> createMember(@RequestBody @Valid MemberCreateRequestDto request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(SuccessType.MEMBER_CREATE_SUCCESS, memberService.createMember(request))
