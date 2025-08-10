@@ -22,7 +22,7 @@ public class MemberService {
 
     public LoginResponseDto login(LoginRequestDto request) {
 
-        Member member = memberRepository.findByMemberId(request.getId())
+        Member member = memberRepository.findByUsername(request.getUsername())
                             .orElseThrow(() -> new CustomException(ErrorType.LOGIN_FAILED));
 
         if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
