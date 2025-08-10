@@ -16,7 +16,7 @@ public class Member {
     private Long id;
 
     @Column(name = "member_id", nullable = false, unique = true)
-    private String memberId;  // 아이디
+    private String username;  // 아이디
 
     @Column(nullable = false)
     private String password;  // 암호화된 비밀번호

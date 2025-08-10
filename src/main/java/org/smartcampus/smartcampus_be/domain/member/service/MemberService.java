@@ -25,11 +25,6 @@ public class MemberService {
         Member member = memberRepository.findByMemberId(request.getId())
                             .orElseThrow(() -> new CustomException(ErrorType.LOGIN_FAILED));
 
-        System.out.println("입력 비번: " + request.getPassword());
-        System.out.println("DB 비번: " + member.getPassword());
-        System.out.println("비교 결과: " + passwordEncoder.matches(request.getPassword(), member.getPassword()));
-
-
         if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
             throw new CustomException(ErrorType.LOGIN_FAILED);
         }
