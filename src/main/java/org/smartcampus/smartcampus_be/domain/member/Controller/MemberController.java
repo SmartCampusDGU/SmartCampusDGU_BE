@@ -5,9 +5,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.smartcampus.smartcampus_be.domain.member.dto.LoginRequestDto;
 import org.smartcampus.smartcampus_be.domain.member.dto.LoginResponseDto;
+import org.smartcampus.smartcampus_be.domain.member.dto.MemberCreateRequestDto;
+import org.smartcampus.smartcampus_be.domain.member.dto.MemberCreateResponseDto;
 import org.smartcampus.smartcampus_be.domain.member.service.MemberService;
 import org.smartcampus.smartcampus_be.global.response.ApiResponse;
 import org.smartcampus.smartcampus_be.global.response.SuccessType;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,6 +32,12 @@ public class MemberController {
     @PostMapping("/log-out")
     public ResponseEntity<ApiResponse<String>> logout(HttpServletRequest request) {
         return ResponseEntity.ok((ApiResponse<String>) ApiResponse.success(SuccessType.LOGOUT_SUCCESS));
+    }
+
+    @PostMapping("/members")
+    public ResponseEntity<ApiResponse<MemberCreateResponseDto>> createMember(@RequestBody @Valid MemberCreateRequestDto request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(SuccessType.MEMBER_CREATE_SUCCESS, memberService.createMember(request))
+        );
     }
 }
 

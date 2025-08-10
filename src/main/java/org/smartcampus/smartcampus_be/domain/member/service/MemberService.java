@@ -3,7 +3,10 @@ package org.smartcampus.smartcampus_be.domain.member.service;
 import lombok.RequiredArgsConstructor;
 import org.smartcampus.smartcampus_be.domain.member.dto.LoginRequestDto;
 import org.smartcampus.smartcampus_be.domain.member.dto.LoginResponseDto;
+import org.smartcampus.smartcampus_be.domain.member.dto.MemberCreateRequestDto;
+import org.smartcampus.smartcampus_be.domain.member.dto.MemberCreateResponseDto;
 import org.smartcampus.smartcampus_be.domain.member.entity.Member;
+import org.smartcampus.smartcampus_be.domain.member.entity.Role;
 import org.smartcampus.smartcampus_be.domain.member.repository.MemberRepository;
 import org.smartcampus.smartcampus_be.global.common.jwt.JwtTokenProvider;
 import org.smartcampus.smartcampus_be.global.common.jwt.UserAuthentication;
@@ -33,5 +36,22 @@ public class MemberService {
         String accessToken = jwtTokenProvider.issueAccessToken(authentication);
 
         return new LoginResponseDto(accessToken);
+    }
+
+    public MemberCreateResponseDto createMember(MemberCreateRequestDto request) {
+
+        if (memberRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new CustomException(ErrorType.DUPLICATE_USERNAME);
+        }
+
+        Member member = Member.builder()
+                            .username(request.getUsername())
+                            .password(passwordEncoder.encode(request.getPassword()))
+                            .name(request.getName())
+                            .description(request.getDescription())
+                            .role(Role.ADMIN) //등록시 관리자 권한 주도록 고정
+                            .build();
+
+        return new MemberCreateResponseDto(memberRepository.save(member).getId());
     }
 }
