@@ -1,10 +1,7 @@
 package org.smartcampus.smartcampus_be.domain.member.service;
 
 import lombok.RequiredArgsConstructor;
-import org.smartcampus.smartcampus_be.domain.member.dto.LoginRequestDto;
-import org.smartcampus.smartcampus_be.domain.member.dto.LoginResponseDto;
-import org.smartcampus.smartcampus_be.domain.member.dto.MemberCreateRequestDto;
-import org.smartcampus.smartcampus_be.domain.member.dto.MemberCreateResponseDto;
+import org.smartcampus.smartcampus_be.domain.member.dto.*;
 import org.smartcampus.smartcampus_be.domain.member.entity.Member;
 import org.smartcampus.smartcampus_be.domain.member.entity.Role;
 import org.smartcampus.smartcampus_be.domain.member.repository.MemberRepository;
@@ -13,8 +10,6 @@ import org.smartcampus.smartcampus_be.global.common.jwt.PrincipalHandler;
 import org.smartcampus.smartcampus_be.global.common.jwt.UserAuthentication;
 import org.smartcampus.smartcampus_be.global.exception.CustomException;
 import org.smartcampus.smartcampus_be.global.exception.ErrorType;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,5 +58,22 @@ public class MemberService {
                             .build();
 
         return new MemberCreateResponseDto(memberRepository.save(member).getId());
+    }
+
+    @Transactional
+    public void updateMember(Long id, MemberUpdateRequestDto request) {
+
+        Member requester = memberRepository.findById(principalHandler.getUserIdFromPrincipal())
+                               .orElseThrow(() -> new CustomException(ErrorType.JWT_UNAUTHORIZED_EXCEPTION));
+
+        Member member = memberRepository.findById(id)
+                            .orElseThrow(() -> new CustomException(ErrorType.MEMBER_NOT_FOUND));
+
+
+        member.update(
+            passwordEncoder.encode(request.getPassword()),
+            request.getName(),
+            request.getDescription()
+        );
     }
 }

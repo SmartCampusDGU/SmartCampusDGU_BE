@@ -26,6 +26,11 @@ public enum ErrorType {
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
 
     /**
+     *  HTTP 404 (NOT FOUND)
+     */
+    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 계정입니다."),
+
+    /**
      * HTTP 409 (CONFLICT)
      */
     DUPLICATE_USERNAME(HttpStatus.CONFLICT, "이미 존재하는 아이디입니다."),
