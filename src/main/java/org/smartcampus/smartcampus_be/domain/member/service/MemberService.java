@@ -13,6 +13,7 @@ import org.smartcampus.smartcampus_be.global.exception.ErrorType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -75,5 +76,20 @@ public class MemberService {
             request.getName(),
             request.getDescription()
         );
+    }
+
+    @Transactional
+    public void deleteMembers(MemberDeleteRequestDto request) {
+
+        Member requester = memberRepository.findById(principalHandler.getUserIdFromPrincipal())
+                               .orElseThrow(() -> new CustomException(ErrorType.JWT_UNAUTHORIZED_EXCEPTION));
+
+        List<Member> members = memberRepository.findAllById(request.getIds());
+
+        if (members.size() != request.getIds().size()) {
+            throw new CustomException(ErrorType.MEMBER_NOT_FOUND); // 일부라도 없으면 실패
+        }
+
+        memberRepository.deleteAll(members);
     }
 }

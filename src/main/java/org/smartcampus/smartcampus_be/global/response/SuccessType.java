@@ -16,7 +16,8 @@ public enum SuccessType {
     LOGIN_SUCCESS(HttpStatus.OK, "로그인에 성공했습니다."),
     LOGOUT_SUCCESS(HttpStatus.OK, "로그아웃에 성공했습니다."),
     MEMBER_CREATE_SUCCESS(HttpStatus.CREATED, "관리자 계정 등록에 성공했습니다."),
-    MEMBER_UPDATE_SUCCESS(HttpStatus.OK, "관리자 계정이 수정되었습니다.");
+    MEMBER_UPDATE_SUCCESS(HttpStatus.OK, "관리자 계정이 수정되었습니다."),
+    MEMBER_DELETE_SUCCESS(HttpStatus.OK, "관리자 계정이 삭제되었습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
