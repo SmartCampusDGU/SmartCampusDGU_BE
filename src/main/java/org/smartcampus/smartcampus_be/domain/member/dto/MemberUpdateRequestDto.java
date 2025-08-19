@@ -14,7 +14,7 @@ public class MemberUpdateRequestDto {
         regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-={}:;\"'<>,.?/]).{8,20}$",
         message = "비밀번호는 영어, 숫자, 특수기호를 포함해 8~20자여야 합니다."
     )
-    private String password; // ✅ 여기에 붙여야 해요
+    private String password;
 
     @NotBlank(message = "계정명은 필수입니다.")
     private String name;
