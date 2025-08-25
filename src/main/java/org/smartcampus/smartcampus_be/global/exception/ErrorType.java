@@ -19,10 +19,16 @@ public enum ErrorType {
      */
     JWT_UNAUTHORIZED_EXCEPTION(HttpStatus.UNAUTHORIZED, "사용자의 로그인 검증을 실패했습니다."),
     LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 일치하지 않습니다."),
+
     /**
      * HTTP 403 (FORBIDDEN)
      */
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
+
+    /**
+     * HTTP 409 (CONFLICT)
+     */
+    DUPLICATE_USERNAME(HttpStatus.CONFLICT, "이미 존재하는 아이디입니다."),
 
     /**
      * HTTP 500 (INTERNAL SERVER ERROR)
