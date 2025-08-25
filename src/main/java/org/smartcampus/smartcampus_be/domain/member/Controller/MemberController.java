@@ -3,20 +3,14 @@ package org.smartcampus.smartcampus_be.domain.member.Controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.smartcampus.smartcampus_be.domain.member.dto.LoginRequestDto;
-import org.smartcampus.smartcampus_be.domain.member.dto.LoginResponseDto;
-import org.smartcampus.smartcampus_be.domain.member.dto.MemberCreateRequestDto;
-import org.smartcampus.smartcampus_be.domain.member.dto.MemberCreateResponseDto;
+import org.smartcampus.smartcampus_be.domain.member.dto.*;
 import org.smartcampus.smartcampus_be.domain.member.service.MemberService;
 import org.smartcampus.smartcampus_be.global.response.ApiResponse;
 import org.smartcampus.smartcampus_be.global.response.SuccessType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -40,6 +34,13 @@ public class MemberController {
     public ResponseEntity<ApiResponse<MemberCreateResponseDto>> createMember(@RequestBody @Valid MemberCreateRequestDto request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(SuccessType.MEMBER_CREATE_SUCCESS, memberService.createMember(request))
         );
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PatchMapping("/members/{id}")
+    public ResponseEntity<ApiResponse<String>> updateMember(@PathVariable Long id, @RequestBody @Valid MemberUpdateRequestDto request) {
+        memberService.updateMember(id, request);
+        return ResponseEntity.ok((ApiResponse<String>)ApiResponse.success(SuccessType.MEMBER_UPDATE_SUCCESS));
     }
 }
 
