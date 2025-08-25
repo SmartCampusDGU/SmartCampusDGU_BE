@@ -1,4 +1,4 @@
-package org.smartcampus.smartcampus_be.dto;
+package org.smartcampus.smartcampus_be.domain.room.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;

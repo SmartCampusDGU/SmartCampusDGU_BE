@@ -13,12 +13,15 @@ public enum ErrorType {
      * HTTP 400 (BAD REQUEST)
      */
     REQUEST_VALIDATION_EXCEPTION(HttpStatus.BAD_REQUEST, "잘못된 요청입니다"),
+    INVALID_THRESHOLD_REQUEST(HttpStatus.BAD_REQUEST, "수동 임계값 입력 시 thresholds가 필요합니다."),
+    MISSING_TOKEN(HttpStatus.BAD_REQUEST, "토큰이 없습니다."),
 
     /**
      * HTTP 401 (UNAUTHORIZED)
      */
     JWT_UNAUTHORIZED_EXCEPTION(HttpStatus.UNAUTHORIZED, "사용자의 로그인 검증을 실패했습니다."),
     LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 일치하지 않습니다."),
+    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "토큰이 유효하지 않습니다."),
 
     /**
      * HTTP 403 (FORBIDDEN)
@@ -29,11 +32,13 @@ public enum ErrorType {
      *  HTTP 404 (NOT FOUND)
      */
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 계정입니다."),
+    ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 공간입니다."),
 
     /**
      * HTTP 409 (CONFLICT)
      */
     DUPLICATE_USERNAME(HttpStatus.CONFLICT, "이미 존재하는 아이디입니다."),
+    DUPLICATE_ROOM_NUMBER(HttpStatus.CONFLICT, "이미 존재하는 강의실 번호입니다."),
 
     /**
      * HTTP 500 (INTERNAL SERVER ERROR)

@@ -1,4 +1,4 @@
-package org.smartcampus.smartcampus_be.dto;
+package org.smartcampus.smartcampus_be.domain.room.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
