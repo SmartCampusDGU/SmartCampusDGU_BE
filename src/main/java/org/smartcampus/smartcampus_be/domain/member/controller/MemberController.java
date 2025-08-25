@@ -1,4 +1,4 @@
-package org.smartcampus.smartcampus_be.domain.member.Controller;
+package org.smartcampus.smartcampus_be.domain.member.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
