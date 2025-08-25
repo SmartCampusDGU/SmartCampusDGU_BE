@@ -1,10 +1,10 @@
-package org.smartcampus.smartcampus_be.dto;
+package org.smartcampus.smartcampus_be.domain.room.dto;
 
 import java.util.List;
 
 public class CreateRoomTypeRequestDto {
-    private String roomType;           // 공간유형명
-    private List<SensorDto> sensors;   // 측정 항목들
+    private String roomType;
+    private List<SensorDto> sensors;
 
     public String getRoomType() { return roomType; }
     public void setRoomType(String roomType) { this.roomType = roomType; }

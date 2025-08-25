@@ -1,15 +1,16 @@
-package org.smartcampus.smartcampus_be.dto;
+package org.smartcampus.smartcampus_be.domain.room.dto;
 
 import java.util.List;
 
 public class RoomTypeListItemDto {
-    private String roomType;          // 공간유형명
-    private List<String> sensorTypes; // 해당 유형의 센서 이름 목록
+    private String roomType;
+    private List<String> sensorTypes;
 
     public RoomTypeListItemDto(String roomType, List<String> sensorTypes) {
         this.roomType = roomType;
         this.sensorTypes = sensorTypes;
     }
+    
     public String getRoomType() { return roomType; }
     public List<String> getSensorTypes() { return sensorTypes; }
 }

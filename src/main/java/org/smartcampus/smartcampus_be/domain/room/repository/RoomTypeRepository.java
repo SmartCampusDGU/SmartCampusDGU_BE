@@ -1,6 +1,6 @@
-package org.smartcampus.smartcampus_be.repository;
+package org.smartcampus.smartcampus_be.domain.room.repository;
 
-import org.smartcampus.smartcampus_be.domain.RoomType;
+import org.smartcampus.smartcampus_be.domain.room.entity.RoomType;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
