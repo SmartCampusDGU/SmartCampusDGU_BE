@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -92,4 +93,21 @@ public class MemberService {
 
         memberRepository.deleteAll(members);
     }
+
+    @Transactional(readOnly = true)
+    public List<MemberListResponseDto> getAllMembers() {
+
+        Member requester = memberRepository.findById(principalHandler.getUserIdFromPrincipal())
+                               .orElseThrow(() -> new CustomException(ErrorType.JWT_UNAUTHORIZED_EXCEPTION));
+
+        return memberRepository.findAll().stream()
+                   .map(member -> new MemberListResponseDto(
+                       member.getUsername(),
+                       member.getPassword(),
+                       member.getName(),
+                       member.getDescription()
+                   ))
+                   .collect(Collectors.toList());
+    }
+
 }
