@@ -18,7 +18,15 @@ public enum SuccessType {
     MEMBER_CREATE_SUCCESS(HttpStatus.CREATED, "관리자 계정 등록에 성공했습니다."),
     MEMBER_UPDATE_SUCCESS(HttpStatus.OK, "관리자 계정이 수정되었습니다."),
     MEMBER_DELETE_SUCCESS(HttpStatus.OK, "관리자 계정이 삭제되었습니다."),
-    MEMBER_GET_SUCCESS(HttpStatus.OK, "관리자 계정 리스트 조회에 성공했습니다.");
+    MEMBER_GET_SUCCESS(HttpStatus.OK, "관리자 계정 리스트 조회에 성공했습니다."),
+
+    /**
+     * ROOM
+     */
+    ROOM_CREATE_SUCCESS(HttpStatus.CREATED, "공간 생성에 성공했습니다."),
+    ROOM_LIST_SUCCESS(HttpStatus.OK, "공간 목록 조회에 성공했습니다."),
+    ROOM_DETAIL_SUCCESS(HttpStatus.OK, "공간 상세 조회에 성공했습니다."),
+    ROOM_UPDATE_SUCCESS(HttpStatus.OK, "공간 수정에 성공했습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
