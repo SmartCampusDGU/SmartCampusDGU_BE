@@ -42,5 +42,12 @@ public class MemberController {
         memberService.updateMember(id, request);
         return ResponseEntity.ok((ApiResponse<String>)ApiResponse.success(SuccessType.MEMBER_UPDATE_SUCCESS));
     }
+
+    @PreAuthorize("isAuthenticated()")
+    @DeleteMapping("/members")
+    public ResponseEntity<ApiResponse<String>> deleteMembers(@RequestBody @Valid MemberDeleteRequestDto request) {
+        memberService.deleteMembers(request);
+        return ResponseEntity.ok((ApiResponse<String>)ApiResponse.success(SuccessType.MEMBER_DELETE_SUCCESS));
+    }
 }
 
