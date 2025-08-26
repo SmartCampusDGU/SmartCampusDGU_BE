@@ -40,6 +40,9 @@ dependencies {
 
 	//Security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
+
+	//Swagger
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.11'
 }
 
 tasks.named('test') {
