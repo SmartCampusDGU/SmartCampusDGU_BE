@@ -1,7 +1,6 @@
 package org.smartcampus.smartcampus_be.global.common.jwt;
 
 import lombok.RequiredArgsConstructor;
-import org.smartcampus.smartcampus_be.global.config.CorsConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -27,7 +26,6 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomJwtAuthenticationEntryPoint customJwtAuthenticationEntryPoint;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
-    private final CorsConfig corsConfig;
 
     // 인증 없이 접근 가능한 URI
     private static final String[] AUTH_WHITE_LIST = {"/api/login"};
@@ -49,7 +47,6 @@ public class SecurityConfig {
                     auth.requestMatchers(AUTH_WHITE_LIST).permitAll();
                     auth.anyRequest().authenticated();
                 })
-                .addFilter(corsConfig.corsFilter())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
