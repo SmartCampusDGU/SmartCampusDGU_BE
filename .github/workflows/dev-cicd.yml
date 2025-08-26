@@ -52,7 +52,7 @@ jobs:
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
-          key: ${{ secrets.DEV_SERVER_PRIVATE_KEY }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
             set -e  # 에러 발생 시 즉시 스크립트 종료
             
