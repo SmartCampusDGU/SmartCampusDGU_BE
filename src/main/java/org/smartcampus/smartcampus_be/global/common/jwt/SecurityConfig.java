@@ -28,7 +28,9 @@ public class SecurityConfig {
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     // 인증 없이 접근 가능한 URI
-    private static final String[] AUTH_WHITE_LIST = {"/api/login"};
+    private static final String[] AUTH_WHITE_LIST = {
+            "/", "/swagger/**", "/swagger-ui/**", "/v3/api-docs/**", "/api/login"
+    };
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
