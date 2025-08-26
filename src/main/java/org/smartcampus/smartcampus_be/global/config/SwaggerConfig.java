@@ -6,15 +6,11 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class SwaggerConfig {
-
-    @Value("${api.base-url}")
-    private String baseUrl;
 
     @Bean
     public OpenAPI openAPI() {
@@ -27,7 +23,6 @@ public class SwaggerConfig {
                 .bearerFormat("JWT")
         );
         Server server = new Server();
-        server.setUrl(baseUrl);
         return new OpenAPI()
                 .info(apiInfo())
                 .components(components)
@@ -37,8 +32,8 @@ public class SwaggerConfig {
 
     private Info apiInfo() {
         return new Info()
-                .title("재고 관리 프로그램") // API의 제목
-                .description("임시 배포 버전") // API에 대한 설명
+                .title("스마트 캠퍼스") // API의 제목
+                .description("스마트 캠퍼스 백엔드 문서") // API에 대한 설명
                 .version("1.0.0"); // API의 버전
     }
 }
