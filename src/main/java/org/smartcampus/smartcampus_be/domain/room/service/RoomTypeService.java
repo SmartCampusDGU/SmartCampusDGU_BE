@@ -3,7 +3,7 @@ package org.smartcampus.smartcampus_be.domain.room.service;
 import lombok.RequiredArgsConstructor;
 import org.smartcampus.smartcampus_be.domain.room.dto.*;
 import org.smartcampus.smartcampus_be.domain.room.entity.RoomType;
-import org.smartcampus.smartcampus_be.domain.room.entity.RoomTypeSensor;
+import org.smartcampus.smartcampus_be.domain.room.entity.RoomTypeDataThreshold;
 import org.smartcampus.smartcampus_be.domain.room.repository.RoomRepository;
 import org.smartcampus.smartcampus_be.domain.room.repository.RoomTypeRepository;
 import org.smartcampus.smartcampus_be.global.exception.CustomException;
@@ -43,7 +43,7 @@ public class RoomTypeService {
                 throw new CustomException(ErrorType.SENSOR_NAME_REQUIRED);
             }
 
-            RoomTypeSensor.RoomTypeSensorBuilder sensorBuilder = RoomTypeSensor.builder()
+            RoomTypeDataThreshold.RoomTypeSensorBuilder sensorBuilder = RoomTypeDataThreshold.builder()
                     .name(s.getName())
                     .unit(s.getUnit());
 
@@ -67,7 +67,7 @@ public class RoomTypeService {
                 }
             }
 
-            RoomTypeSensor sensor = sensorBuilder.build();
+            RoomTypeDataThreshold sensor = sensorBuilder.build();
             roomType.addSensor(sensor);
         }
 
@@ -81,7 +81,7 @@ public class RoomTypeService {
                 .map(rt -> new RoomTypeListItemDto(
                         rt.getName(),
                         rt.getSensors().stream()
-                                .map(RoomTypeSensor::getName)
+                                .map(RoomTypeDataThreshold::getName)
                                 .collect(Collectors.toList())
                 ))
                 .collect(Collectors.toList());
@@ -114,13 +114,13 @@ public class RoomTypeService {
                 throw new CustomException(ErrorType.SENSOR_NAME_REQUIRED);
             }
 
-            RoomTypeSensor target = roomType.getSensors().stream()
+            RoomTypeDataThreshold target = roomType.getSensors().stream()
                     .filter(s -> m.getName().equals(s.getName()))
                     .findFirst()
                     .orElse(null);
 
             if (target == null) {
-                target = RoomTypeSensor.builder()
+                target = RoomTypeDataThreshold.builder()
                         .name(m.getName())
                         .build();
                 roomType.addSensor(target);
@@ -150,7 +150,7 @@ public class RoomTypeService {
         RoomType savedRoomType = roomTypeRepository.save(roomType);
 
         List<SensorDto> measurements = new ArrayList<>();
-        for (RoomTypeSensor s : savedRoomType.getSensors()) {
+        for (RoomTypeDataThreshold s : savedRoomType.getSensors()) {
             SensorDto d = new SensorDto();
             d.setName(s.getName());
             d.setUnit(s.getUnit());

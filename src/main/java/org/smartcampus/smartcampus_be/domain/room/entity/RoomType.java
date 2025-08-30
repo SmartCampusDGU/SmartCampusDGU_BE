@@ -8,27 +8,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "room_types")
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
+@Table(name = "room_type")
 public class RoomType extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(length = 10, nullable = false, unique = true)
     private String name;
 
-    @OneToMany(mappedBy = "roomType", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<RoomTypeSensor> sensors = new ArrayList<>();
+    @Column(length = 50)
+    private String description;
 
-    public void addSensor(RoomTypeSensor sensor) {
-        sensors.add(sensor);
-        sensor.setRoomType(this);
-    }
+    @OneToMany(mappedBy = "roomType", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Room> rooms = new ArrayList<>();
+
+    @OneToMany(mappedBy = "roomType", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RoomTypeDataThreshold> roomTypeDataThresholds = new ArrayList<>();
 }

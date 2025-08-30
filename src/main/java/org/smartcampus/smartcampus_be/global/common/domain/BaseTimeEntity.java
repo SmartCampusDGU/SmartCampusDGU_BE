@@ -1,5 +1,6 @@
 package org.smartcampus.smartcampus_be.global.common.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import org.springframework.data.annotation.CreatedDate;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 public abstract class BaseTimeEntity {
 
     @CreatedDate // 엔티티 생성시 자동으로 값 설정
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate // 엔티티 값 변경시 자동으로 값 갱신

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.smartcampus.smartcampus_be.domain.room.dto.*;
 import org.smartcampus.smartcampus_be.domain.room.dto.RoomDetailDto.MeasurementDto;
 import org.smartcampus.smartcampus_be.domain.room.entity.Room;
-import org.smartcampus.smartcampus_be.domain.room.entity.RoomSensor;
+import org.smartcampus.smartcampus_be.domain.room.entity.RoomDataThreshold;
 import org.smartcampus.smartcampus_be.domain.room.repository.RoomRepository;
 import org.smartcampus.smartcampus_be.global.exception.CustomException;
 import org.smartcampus.smartcampus_be.global.exception.ErrorType;
@@ -36,7 +36,7 @@ public class RoomService {
                 throw new CustomException(ErrorType.INVALID_THRESHOLD_REQUEST);
             }
 
-            RoomSensor.RoomSensorBuilder sensorBuilder = RoomSensor.builder()
+            RoomDataThreshold.RoomSensorBuilder sensorBuilder = RoomDataThreshold.builder()
                     .name(s.getName())
                     .useDefault(s.isUseDefault());
 
@@ -56,7 +56,7 @@ public class RoomService {
                 }
             }
 
-            RoomSensor sensor = sensorBuilder.build();
+            RoomDataThreshold sensor = sensorBuilder.build();
             room.addSensor(sensor);
         }
 
@@ -76,7 +76,7 @@ public class RoomService {
                         room.getRoomType(),
                         room.getSensors().stream()
                                 .filter(s -> !toBool(s.isUseDefault()))
-                                .map(RoomSensor::getName)
+                                .map(RoomDataThreshold::getName)
                                 .collect(Collectors.toList())
                 ))
                 .collect(Collectors.toList());
@@ -98,7 +98,7 @@ public class RoomService {
 
         room.getSensors().clear();
         for (var m : request.getMeasurements()) {
-            RoomSensor.RoomSensorBuilder sensorBuilder = RoomSensor.builder()
+            RoomDataThreshold.RoomSensorBuilder sensorBuilder = RoomDataThreshold.builder()
                     .room(room)
                     .name(m.getName());
 
@@ -128,7 +128,7 @@ public class RoomService {
                 }
             }
             
-            RoomSensor sensor = sensorBuilder.build();
+            RoomDataThreshold sensor = sensorBuilder.build();
             room.addSensor(sensor);
         }
 

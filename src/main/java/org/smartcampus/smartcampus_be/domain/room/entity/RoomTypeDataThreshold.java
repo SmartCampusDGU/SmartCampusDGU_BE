@@ -2,16 +2,14 @@ package org.smartcampus.smartcampus_be.domain.room.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.smartcampus.smartcampus_be.domain.sensor.entity.DataType;
 import org.smartcampus.smartcampus_be.global.common.domain.BaseTimeEntity;
 
 @Entity
-@Table(name = "room_type_sensors")
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
-public class RoomTypeSensor extends BaseTimeEntity {
+@Table(name = "room_type_data_threshold")
+public class RoomTypeDataThreshold extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,27 +19,25 @@ public class RoomTypeSensor extends BaseTimeEntity {
     @JoinColumn(name = "room_type_id", nullable = false)
     private RoomType roomType;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "data_type_id", nullable = false)
+    private DataType dataType;
+
     @Column(nullable = false)
-    private String name;
-
-    @Column(length = 20)
-    private String unit;
-
-    @Column(name = "caution_min")
     private Double cautionMin;
-    
-    @Column(name = "caution_max")
+
+    @Column(nullable = false)
     private Double cautionMax;
 
-    @Column(name = "danger_min")
+    @Column(nullable = false)
     private Double dangerMin;
-    
-    @Column(name = "danger_max")
+
+    @Column(nullable = false)
     private Double dangerMax;
 
-    @Column(name = "emergency_min")
+    @Column(nullable = false)
     private Double emergencyMin;
-    
-    @Column(name = "emergency_max")
+
+    @Column(nullable = false)
     private Double emergencyMax;
 }
