@@ -13,6 +13,7 @@ import org.smartcampus.smartcampus_be.global.exception.ErrorType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,7 +29,7 @@ public class MemberService {
     public LoginResponseDto login(LoginRequestDto request) {
 
         Member member = memberRepository.findByUsername(request.getUsername())
-                            .orElseThrow(() -> new CustomException(ErrorType.LOGIN_FAILED));
+                .orElseThrow(() -> new CustomException(ErrorType.LOGIN_FAILED));
 
         if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
             throw new CustomException(ErrorType.LOGIN_FAILED);
@@ -45,19 +46,19 @@ public class MemberService {
 
         // db에 요청하는 사람이 있는지
         Member requester = memberRepository.findById(principalHandler.getUserIdFromPrincipal())
-                               .orElseThrow(() -> new CustomException(ErrorType.JWT_UNAUTHORIZED_EXCEPTION));
+                .orElseThrow(() -> new CustomException(ErrorType.JWT_UNAUTHORIZED_EXCEPTION));
 
         if (memberRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new CustomException(ErrorType.DUPLICATE_USERNAME);
         }
 
         Member member = Member.builder()
-                            .username(request.getUsername())
-                            .password(passwordEncoder.encode(request.getPassword()))
-                            .name(request.getName())
-                            .description(request.getDescription())
-                            .role(Role.ADMIN) //등록시 관리자 권한 주도록 고정
-                            .build();
+                .username(request.getUsername())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .name(request.getName())
+                .description(request.getDescription())
+                .role(Role.ADMIN) //등록시 관리자 권한 주도록 고정
+                .build();
 
         return new MemberCreateResponseDto(memberRepository.save(member).getId());
     }
@@ -66,16 +67,16 @@ public class MemberService {
     public void updateMember(Long id, MemberUpdateRequestDto request) {
 
         Member requester = memberRepository.findById(principalHandler.getUserIdFromPrincipal())
-                               .orElseThrow(() -> new CustomException(ErrorType.JWT_UNAUTHORIZED_EXCEPTION));
+                .orElseThrow(() -> new CustomException(ErrorType.JWT_UNAUTHORIZED_EXCEPTION));
 
         Member member = memberRepository.findById(id)
-                            .orElseThrow(() -> new CustomException(ErrorType.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorType.MEMBER_NOT_FOUND));
 
 
         member.update(
-            passwordEncoder.encode(request.getPassword()),
-            request.getName(),
-            request.getDescription()
+                passwordEncoder.encode(request.getPassword()),
+                request.getName(),
+                request.getDescription()
         );
     }
 
@@ -83,7 +84,7 @@ public class MemberService {
     public void deleteMembers(MemberDeleteRequestDto request) {
 
         Member requester = memberRepository.findById(principalHandler.getUserIdFromPrincipal())
-                               .orElseThrow(() -> new CustomException(ErrorType.JWT_UNAUTHORIZED_EXCEPTION));
+                .orElseThrow(() -> new CustomException(ErrorType.JWT_UNAUTHORIZED_EXCEPTION));
 
         List<Member> members = memberRepository.findAllById(request.getIds());
 
@@ -98,16 +99,16 @@ public class MemberService {
     public List<MemberListResponseDto> getAllMembers() {
 
         Member requester = memberRepository.findById(principalHandler.getUserIdFromPrincipal())
-                               .orElseThrow(() -> new CustomException(ErrorType.JWT_UNAUTHORIZED_EXCEPTION));
+                .orElseThrow(() -> new CustomException(ErrorType.JWT_UNAUTHORIZED_EXCEPTION));
 
         return memberRepository.findAll().stream()
-                   .map(member -> new MemberListResponseDto(
-                       member.getUsername(),
-                       member.getPassword(),
-                       member.getName(),
-                       member.getDescription()
-                   ))
-                   .collect(Collectors.toList());
+                .map(member -> new MemberListResponseDto(
+                        member.getUsername(),
+                        member.getPassword(),
+                        member.getName(),
+                        member.getDescription()
+                ))
+                .collect(Collectors.toList());
     }
 
 }

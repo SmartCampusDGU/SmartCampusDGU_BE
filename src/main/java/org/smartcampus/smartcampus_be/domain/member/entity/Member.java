@@ -34,6 +34,15 @@ public class Member extends BaseTimeEntity {
     @Column(length = 50)
     private String description; // 설명
 
+    @Builder
+    public Member(String username, String password, String name, Role role, String description) {
+        this.username = username;
+        this.password = password;
+        this.name = name;
+        this.role = role;
+        this.description = description;
+    }
+
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OutlierLog> outlierLogs = new ArrayList<>();
 
