@@ -43,4 +43,17 @@ public class RoomDataThreshold extends BaseTimeEntity {
 
     @Column(nullable = false)
     private Boolean isModified;
+
+    @Builder
+    public RoomDataThreshold(Room room, DataType dataType, Double cautionMin, Double cautionMax, Double dangerMin, Double dangerMax, Double emergencyMin, Double emergencyMax, Boolean isModified) {
+        this.room = room;
+        this.dataType = dataType;
+        this.cautionMin = cautionMin;
+        this.cautionMax = cautionMax;
+        this.dangerMin = dangerMin;
+        this.dangerMax = dangerMax;
+        this.emergencyMin = emergencyMin;
+        this.emergencyMax = emergencyMax;
+        this.isModified = isModified;
+    }
 }

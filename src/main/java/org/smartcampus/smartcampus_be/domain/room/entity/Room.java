@@ -21,14 +21,15 @@ public class Room extends BaseTimeEntity {
     @Column(name = "room_number", nullable = false, length = 50)
     private String roomNumber;
 
-    @Builder
-    public Room(String roomNumber) {
-        this.roomNumber = roomNumber;
-    }
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_type_id", nullable = false)
     private RoomType roomType;
+
+    @Builder
+    public Room(String roomNumber, RoomType roomType) {
+        this.roomNumber = roomNumber;
+        this.roomType = roomType;
+    }
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RoomDataThreshold> roomDataThresholds = new ArrayList<>();

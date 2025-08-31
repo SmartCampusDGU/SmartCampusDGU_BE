@@ -1,161 +1,129 @@
 package org.smartcampus.smartcampus_be.domain.room.service;
 
 import lombok.RequiredArgsConstructor;
-import org.smartcampus.smartcampus_be.domain.room.dto.*;
-import org.smartcampus.smartcampus_be.domain.room.dto.RoomDetailDto.MeasurementDto;
+import org.smartcampus.smartcampus_be.domain.room.dto.request.CreateRoomRequest;
+import org.smartcampus.smartcampus_be.domain.room.dto.request.RoomDataTypeRequest;
+import org.smartcampus.smartcampus_be.domain.room.dto.request.UpdateRoomRequest;
+import org.smartcampus.smartcampus_be.domain.room.dto.response.PagingRoomResponse;
+import org.smartcampus.smartcampus_be.domain.room.dto.response.RoomResponse;
 import org.smartcampus.smartcampus_be.domain.room.entity.Room;
 import org.smartcampus.smartcampus_be.domain.room.entity.RoomDataThreshold;
+import org.smartcampus.smartcampus_be.domain.room.entity.RoomType;
+import org.smartcampus.smartcampus_be.domain.room.repository.RoomDataThresholdRepository;
 import org.smartcampus.smartcampus_be.domain.room.repository.RoomRepository;
+import org.smartcampus.smartcampus_be.domain.room.repository.RoomTypeRepository;
+import org.smartcampus.smartcampus_be.domain.sensor.entity.DataType;
+import org.smartcampus.smartcampus_be.domain.sensor.repository.DataTypeRepository;
 import org.smartcampus.smartcampus_be.global.exception.CustomException;
 import org.smartcampus.smartcampus_be.global.exception.ErrorType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class RoomService {
 
     private final RoomRepository roomRepository;
+    private final RoomTypeRepository roomTypeRepository;
+    private final DataTypeRepository dataTypeRepository;
+    private final RoomDataThresholdRepository roomDataThresholdRepository;
 
     @Transactional
-    public Long createRoom(CreateRoomRequestDto request) {
-        if (roomRepository.existsByRoomNumber(request.getRoomNumber())) {
-            throw new CustomException(ErrorType.DUPLICATE_ROOM_NUMBER);
+    public Long createRoom(CreateRoomRequest request) {
+        RoomType roomType = roomTypeRepository.findById(request.roomTypeId())
+                .orElseThrow(() -> new CustomException(ErrorType.ROOM_TYPE_NOT_FOUND));
+        Room room = request.toEntity(roomType);
+        Room savedRoom = roomRepository.save(room);
+        List<Long> dataTypeIds = request.dataTypes().stream()
+                .map(RoomDataTypeRequest::id)
+                .toList();
+        List<DataType> dataTypes = dataTypeRepository.findAllById(dataTypeIds);
+        if (dataTypes.size() != dataTypeIds.size()) {
+            throw new CustomException(ErrorType.DATA_TYPE_NOT_FOUND);
         }
-
-        Room room = Room.builder()
-                .roomNumber(request.getRoomNumber())
-                .roomType(request.getRoomType())
-                .build();
-
-        for (var s : request.getSensors()) {
-            if (!s.isUseDefault() && s.getThresholds() == null) {
-                throw new CustomException(ErrorType.INVALID_THRESHOLD_REQUEST);
-            }
-
-            RoomDataThreshold.RoomSensorBuilder sensorBuilder = RoomDataThreshold.builder()
-                    .name(s.getName())
-                    .useDefault(s.isUseDefault());
-
-            if (!s.isUseDefault() && s.getThresholds() != null) {
-                var t = s.getThresholds();
-                if (t.getCaution() != null) {
-                    sensorBuilder.cautionMin(toDouble(t.getCaution().getMin()))
-                               .cautionMax(toDouble(t.getCaution().getMax()));
-                }
-                if (t.getDanger() != null) {
-                    sensorBuilder.dangerMin(toDouble(t.getDanger().getMin()))
-                               .dangerMax(toDouble(t.getDanger().getMax()));
-                }
-                if (t.getEmergency() != null) {
-                    sensorBuilder.emergencyMin(toDouble(t.getEmergency().getMin()))
-                               .emergencyMax(toDouble(t.getEmergency().getMax()));
-                }
-            }
-
-            RoomDataThreshold sensor = sensorBuilder.build();
-            room.addSensor(sensor);
-        }
-
-        Room saved = roomRepository.save(room);
-        return saved.getId();
-    }
-
-    @Transactional(readOnly = true)
-    public List<RoomListItemDto> getRooms(String roomType) {
-        List<Room> rooms = (roomType == null || roomType.isBlank())
-                ? roomRepository.findAll()
-                : roomRepository.findByRoomType(roomType);
-
-        return rooms.stream()
-                .map(room -> new RoomListItemDto(
-                        room.getId(),
-                        room.getRoomType(),
-                        room.getSensors().stream()
-                                .filter(s -> !toBool(s.isUseDefault()))
-                                .map(RoomDataThreshold::getName)
-                                .collect(Collectors.toList())
-                ))
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public RoomDetailDto getRoomDetail(Long roomId) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new CustomException(ErrorType.ROOM_NOT_FOUND));
-        return buildDetail(room);
-    }
-
-    @Transactional
-    public RoomDetailDto updateRoom(Long roomId, UpdateRoomRequestDto request) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new CustomException(ErrorType.ROOM_NOT_FOUND));
-
-        room.setRoomType(request.getRoomType());
-
-        room.getSensors().clear();
-        for (var m : request.getMeasurements()) {
-            RoomDataThreshold.RoomSensorBuilder sensorBuilder = RoomDataThreshold.builder()
-                    .room(room)
-                    .name(m.getName());
-
-            if (m.getUnit() != null && !m.getUnit().isBlank()) {
-                sensorBuilder.unit(m.getUnit());
-            }
-
-            var th = m.getThresholds();
-            if (th == null) {
-                sensorBuilder.useDefault(true);
-            } else {
-                sensorBuilder.useDefault(false);
-                
-                List<Double> caution = th.get("주의");
-                if (caution != null && caution.size() >= 2) {
-                    sensorBuilder.cautionMin(caution.get(0)).cautionMax(caution.get(1));
-                }
-                
-                List<Double> danger = th.get("위험");
-                if (danger != null && danger.size() >= 2) {
-                    sensorBuilder.dangerMin(danger.get(0)).dangerMax(danger.get(1));
-                }
-                
-                List<Double> emergency = th.get("응급");
-                if (emergency != null && emergency.size() >= 2) {
-                    sensorBuilder.emergencyMin(emergency.get(0)).emergencyMax(emergency.get(1));
-                }
-            }
-            
-            RoomDataThreshold sensor = sensorBuilder.build();
-            room.addSensor(sensor);
-        }
-
-        Room saved = roomRepository.save(room);
-        return buildDetail(saved);
-    }
-
-    private boolean toBool(Boolean b) { 
-        return b != null && b; 
-    }
-
-    private static Double toDouble(Number n) { 
-        return (n == null) ? null : n.doubleValue(); 
-    }
-    private RoomDetailDto buildDetail(Room room) {
-        List<MeasurementDto> measurements = room.getSensors().stream()
-                .map(s -> {
-                    String unit = s.getUnit() != null ? s.getUnit() : "";
-                    Map<String, List<Double>> thresholds = new LinkedHashMap<>();
-                    thresholds.put("주의", Arrays.asList(s.getCautionMin(), s.getCautionMax()));
-                    thresholds.put("위험", Arrays.asList(s.getDangerMin(), s.getDangerMax()));
-                    thresholds.put("응급", Arrays.asList(s.getEmergencyMin(), s.getEmergencyMax()));
-                    return new MeasurementDto(s.getName(), unit, thresholds);
+        Map<Long, DataType> dataTypeMap = dataTypes.stream()
+                .collect(Collectors.toMap(DataType::getId, dataType -> dataType));
+        List<RoomDataThreshold> thresholds = request.dataTypes().stream()
+                .map(roomDataTypeRequest -> {
+                    DataType dataType = dataTypeMap.get(roomDataTypeRequest.id());
+                    return roomDataTypeRequest.toEntity(savedRoom, dataType);
                 })
-                .collect(Collectors.toList());
-
-        return new RoomDetailDto(room.getId(), room.getRoomType(), measurements);
+                .toList();
+        roomDataThresholdRepository.saveAll(thresholds);
+        return savedRoom.getId();
     }
 
+    public PagingRoomResponse getRooms(Long roomTypeId, Pageable pageable) {
+        Page<Long> idPage;
+        if (roomTypeId != null) {
+            RoomType roomType = roomTypeRepository.findById(roomTypeId)
+                    .orElseThrow(() -> new CustomException(ErrorType.ROOM_TYPE_NOT_FOUND));
+            idPage = roomRepository.findPageIdsByRoomType(roomType, pageable);
+        } else {
+            idPage = roomRepository.findPageIds(pageable);
+        }
+        List<Long> ids = idPage.getContent();
+        if (ids.isEmpty()) {
+            Page<Room> emptyPage = new PageImpl<>(List.of(), pageable, idPage.getTotalElements());
+            return PagingRoomResponse.from(emptyPage, List.of());
+        }
+        List<Room> fetched = roomRepository.findByIdIn(ids);
+        Map<Long, Integer> order = new HashMap<>();
+        for (int i = 0; i < ids.size(); i++) order.put(ids.get(i), i);
+        List<Room> ordered = fetched.stream()
+                .collect(Collectors.toMap(
+                        Room::getId,
+                        Function.identity(),
+                        (a, b) -> a,
+                        LinkedHashMap::new
+                ))
+                .values().stream()
+                .sorted(Comparator.comparingInt(r -> order.get(r.getId())))
+                .toList();
+        List<RoomResponse> roomResponses = ordered.stream()
+                .map(RoomResponse::from)
+                .collect(Collectors.toList());
+        Page<Room> roomPage = new PageImpl<>(ordered, pageable, idPage.getTotalElements());
+        return PagingRoomResponse.from(roomPage, roomResponses);
+    }
+
+    public RoomResponse getRoomDetail(Long roomId) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new CustomException(ErrorType.ROOM_NOT_FOUND));
+        return RoomResponse.from(room);
+    }
+
+    @Transactional
+    public RoomResponse updateRoom(Long roomId, UpdateRoomRequest request) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new CustomException(ErrorType.ROOM_NOT_FOUND));
+        room.getRoomDataThresholds().clear();
+        if (request.dataTypes() != null && !request.dataTypes().isEmpty()) {
+            List<Long> dataTypeIds = request.dataTypes().stream()
+                    .map(RoomDataTypeRequest::id)
+                    .toList();
+            List<DataType> dataTypes = dataTypeRepository.findAllById(dataTypeIds);
+            if (dataTypes.size() != dataTypeIds.size()) {
+                throw new CustomException(ErrorType.DATA_TYPE_NOT_FOUND);
+            }
+            Map<Long, DataType> dataTypeMap = dataTypes.stream()
+                    .collect(Collectors.toMap(DataType::getId, dataType -> dataType));
+            List<RoomDataThreshold> thresholds = request.dataTypes().stream()
+                    .map(roomDataTypeRequest -> {
+                        DataType dataType = dataTypeMap.get(roomDataTypeRequest.id());
+                        return roomDataTypeRequest.toEntity(room, dataType);
+                    })
+                    .toList();
+            roomDataThresholdRepository.saveAll(thresholds);
+        }
+        return RoomResponse.from(room);
+    }
 }

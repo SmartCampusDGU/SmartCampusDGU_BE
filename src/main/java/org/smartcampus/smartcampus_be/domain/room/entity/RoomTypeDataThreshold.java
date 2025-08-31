@@ -40,4 +40,16 @@ public class RoomTypeDataThreshold extends BaseTimeEntity {
 
     @Column(nullable = false)
     private Double emergencyMax;
+
+    @Builder
+    public RoomTypeDataThreshold(RoomType roomType, DataType dataType, Double cautionMin, Double cautionMax, Double dangerMin, Double dangerMax, Double emergencyMin, Double emergencyMax) {
+        this.roomType = roomType;
+        this.dataType = dataType;
+        this.cautionMin = cautionMin;
+        this.cautionMax = cautionMax;
+        this.dangerMin = dangerMin;
+        this.dangerMax = dangerMax;
+        this.emergencyMin = emergencyMin;
+        this.emergencyMax = emergencyMax;
+    }
 }

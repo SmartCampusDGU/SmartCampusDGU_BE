@@ -23,9 +23,23 @@ public class RoomType extends BaseTimeEntity {
     @Column(length = 50)
     private String description;
 
+    @Builder
+    public RoomType(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
+
     @OneToMany(mappedBy = "roomType", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Room> rooms = new ArrayList<>();
 
     @OneToMany(mappedBy = "roomType", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RoomTypeDataThreshold> roomTypeDataThresholds = new ArrayList<>();
+
+    public void updateName(String name) {
+        this.name = name;
+    }
+
+    public void updateDescription(String description) {
+        this.description = description;
+    }
 }

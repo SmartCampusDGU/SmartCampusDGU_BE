@@ -38,6 +38,7 @@ public enum ErrorType {
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 계정입니다."),
     ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 공간입니다."),
     ROOM_TYPE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 공간유형을 찾을 수 없습니다."),
+    DATA_TYPE_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 데이터 타입입니다."),
 
     /**
      * HTTP 409 (CONFLICT)
