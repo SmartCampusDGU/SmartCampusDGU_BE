@@ -34,6 +34,7 @@ public class RoomController {
         );
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/rooms")
     public ResponseEntity<ApiResponse<PagingRoomResponse>> getRooms(
             @RequestParam(value = "roomType", required = false) Long roomTypeId,
