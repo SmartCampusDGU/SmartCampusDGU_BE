@@ -2,6 +2,7 @@ package org.smartcampus.smartcampus_be.domain.sensor.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.smartcampus.smartcampus_be.domain.room.entity.Room;
@@ -24,14 +25,14 @@ public class Sensor extends BaseTimeEntity {
     @JoinColumn(name = "room_id", nullable = false)
     private Room room;
 
-    @Column(length = 10, nullable = false)
-    private String name;
-
-    @Column(length = 10, nullable = false)
-    private String modelName;
-
     @Column(length = 50, nullable = false)
     private String serialNumber;
+
+    @Builder
+    public Sensor(Room room, String serialNumber) {
+        this.room = room;
+        this.serialNumber = serialNumber;
+    }
 
     @OneToMany(mappedBy = "sensor", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SensorDataType> sensorDataTypes = new ArrayList<>();
