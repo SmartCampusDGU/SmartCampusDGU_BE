@@ -25,4 +25,6 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
 
     @EntityGraph(attributePaths = {"roomType", "roomDataThresholds", "roomDataThresholds.dataType"})
     Optional<Room> findById(Long id);
+
+    Optional<Room> findByRoomNumber(String roomNumber);
 }

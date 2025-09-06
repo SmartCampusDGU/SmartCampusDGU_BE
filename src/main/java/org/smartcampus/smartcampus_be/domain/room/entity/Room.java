@@ -36,9 +36,4 @@ public class Room extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Sensor> sensors = new ArrayList<>();
-
-//    public void addSensor(RoomDataThreshold roomDataThresholds) {
-//        roomDataThresholds.setRoom(this);
-//        this.roomDataThresholds.add(roomDataThresholds);
-//    }
 }
