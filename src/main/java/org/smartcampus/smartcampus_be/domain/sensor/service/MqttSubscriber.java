@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.eclipse.paho.client.mqttv3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartcampus.smartcampus_be.domain.outlier.service.OutlierService;
 import org.smartcampus.smartcampus_be.domain.sensor.entity.DataType;
 import org.smartcampus.smartcampus_be.domain.sensor.entity.Sensor;
 import org.smartcampus.smartcampus_be.domain.sensor.entity.SensorData;
@@ -33,6 +34,7 @@ public class MqttSubscriber {
     private final DataTypeRepository dataTypeRepository;
     private final SensorRepository sensorRepository;
     private final SensorDataRepository sensorDataRepository;
+    private final OutlierService outlierService;
 
     @Value("${mqtt.broker-url}")
     private String BROKER_URL;
@@ -89,6 +91,9 @@ public class MqttSubscriber {
                             .build();
 
                     sensorDataRepository.save(sensorData);
+                    
+                    // 이상치 감지 및 저장
+                    outlierService.detectAndSaveOutlier(sensorData);
 
                     logger.info("{} data saved: {}", dataType, sensorData);
                 } catch (Exception e) {

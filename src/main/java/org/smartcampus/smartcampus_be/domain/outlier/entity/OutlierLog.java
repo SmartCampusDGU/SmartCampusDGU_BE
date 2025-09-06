@@ -2,6 +2,7 @@ package org.smartcampus.smartcampus_be.domain.outlier.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.smartcampus.smartcampus_be.domain.member.entity.Member;
@@ -19,7 +20,7 @@ public class OutlierLog extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
+    @JoinColumn(name = "member_id")
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -39,4 +40,26 @@ public class OutlierLog extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CheckStatus checkStatus;
+    
+    @Builder
+    public OutlierLog(Member member, SensorData sensorData, Double value, OutlierLevel level, ActionStatus actionStatus, CheckStatus checkStatus) {
+        this.member = member;
+        this.sensorData = sensorData;
+        this.value = value;
+        this.level = level;
+        this.actionStatus = actionStatus;
+        this.checkStatus = checkStatus;
+    }
+    
+    public void updateCheckStatus(CheckStatus checkStatus) {
+        this.checkStatus = checkStatus;
+    }
+    
+    public void updateActionStatus(ActionStatus actionStatus) {
+        this.actionStatus = actionStatus;
+    }
+    
+    public void assignMember(Member member) {
+        this.member = member;
+    }
 }
