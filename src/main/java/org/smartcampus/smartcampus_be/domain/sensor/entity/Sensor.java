@@ -26,12 +26,12 @@ public class Sensor extends BaseTimeEntity {
     private Room room;
 
     @Column(length = 50, nullable = false)
-    private String serialNumber;
+    private String macAddress;
 
     @Builder
-    public Sensor(Room room, String serialNumber) {
+    public Sensor(Room room, String macAddress) {
         this.room = room;
-        this.serialNumber = serialNumber;
+        this.macAddress = macAddress;
     }
 
     @OneToMany(mappedBy = "sensor", cascade = CascadeType.ALL, orphanRemoval = true)

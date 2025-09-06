@@ -2,6 +2,7 @@ package org.smartcampus.smartcampus_be.domain.sensor.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.smartcampus.smartcampus_be.domain.room.entity.RoomDataThreshold;
@@ -21,11 +22,17 @@ public class DataType extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 10, nullable = false)
+    @Column(length = 20, nullable = false)
     private String name;
 
     @Column(length = 10, nullable = false)
     private String unit;
+
+    @Builder
+    public DataType(String name, String unit) {
+        this.name = name;
+        this.unit = unit;
+    }
 
     @OneToMany(mappedBy = "dataType", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SensorData> sensorDatas = new ArrayList<>();

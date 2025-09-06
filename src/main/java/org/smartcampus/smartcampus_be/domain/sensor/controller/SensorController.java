@@ -8,10 +8,7 @@ import org.smartcampus.smartcampus_be.domain.sensor.service.SensorService;
 import org.smartcampus.smartcampus_be.global.response.ApiResponse;
 import org.smartcampus.smartcampus_be.global.response.SuccessType;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
