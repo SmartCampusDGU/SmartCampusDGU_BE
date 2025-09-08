@@ -2,6 +2,7 @@ package org.smartcampus.smartcampus_be.domain.outlier.service;
 
 import lombok.RequiredArgsConstructor;
 import org.smartcampus.smartcampus_be.domain.member.entity.Member;
+import org.smartcampus.smartcampus_be.domain.outlier.dto.request.OutlierSearchRequest;
 import org.smartcampus.smartcampus_be.domain.outlier.dto.request.UpdateOutlierStatusRequest;
 import org.smartcampus.smartcampus_be.domain.outlier.entity.*;
 import org.smartcampus.smartcampus_be.domain.outlier.repository.OutlierLogRepository;
@@ -144,6 +145,17 @@ public class OutlierService {
     
     public Page<OutlierLog> getAllOutlierLogs(Pageable pageable) {
         return outlierLogRepository.findAllOrderByCreatedAtDesc(pageable);
+    }
+    
+    public Page<OutlierLog> getAllOutlierLogs(OutlierSearchRequest searchRequest, Pageable pageable) {
+        return outlierLogRepository.findWithSearchConditions(
+                searchRequest.getLevel(),
+                searchRequest.getCheckStatus(),
+                searchRequest.getRoomId(),
+                searchRequest.getStartDate(),
+                searchRequest.getEndDate(),
+                pageable
+        );
     }
     
     public Long getAllUnconfirmedCount() {

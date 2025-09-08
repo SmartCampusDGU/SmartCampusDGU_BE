@@ -45,7 +45,7 @@ public class OutlierController {
             @Parameter(description = "페이지 크기") @RequestParam(defaultValue = "20") int size) {
         
         Pageable pageable = PageRequest.of(page, size);
-        Page<OutlierLog> outlierLogs = outlierService.getAllOutlierLogs(pageable);
+        Page<OutlierLog> outlierLogs = outlierService.getAllOutlierLogs(searchRequest, pageable);
         
         PagingOutlierLogResponse response = PagingOutlierLogResponse.from(outlierLogs);
         return ApiResponse.success(SuccessType.PROCESS_SUCCESS, response);

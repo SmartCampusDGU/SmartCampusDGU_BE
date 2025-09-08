@@ -94,6 +94,24 @@ public interface OutlierLogRepository extends JpaRepository<OutlierLog, Long> {
     Long countByLevel(@Param("level") OutlierLevel level);
     
     @Query("SELECT o FROM OutlierLog o " +
+           "JOIN FETCH o.sensorData sd " +
+           "JOIN FETCH sd.sensor s " +
+           "JOIN FETCH s.room r " +
+           "JOIN FETCH sd.dataType dt " +
+           "WHERE (:level IS NULL OR o.level = :level) " +
+           "AND (:checkStatus IS NULL OR o.checkStatus = :checkStatus) " +
+           "AND (:roomId IS NULL OR s.room.id = :roomId) " +
+           "AND (:startDate IS NULL OR o.createdAt >= :startDate) " +
+           "AND (:endDate IS NULL OR o.createdAt <= :endDate) " +
+           "ORDER BY o.createdAt DESC")
+    Page<OutlierLog> findWithSearchConditions(@Param("level") OutlierLevel level,
+                                              @Param("checkStatus") CheckStatus checkStatus,
+                                              @Param("roomId") Long roomId,
+                                              @Param("startDate") LocalDateTime startDate,
+                                              @Param("endDate") LocalDateTime endDate,
+                                              Pageable pageable);
+    
+    @Query("SELECT o FROM OutlierLog o " +
            "WHERE o.sensorData.sensor.id = :sensorId " +
            "AND o.sensorData.dataType.id = :dataTypeId " +
            "AND o.level = :level " +
