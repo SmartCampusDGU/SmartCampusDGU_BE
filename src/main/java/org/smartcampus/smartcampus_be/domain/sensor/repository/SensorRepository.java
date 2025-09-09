@@ -15,4 +15,6 @@ public interface SensorRepository extends JpaRepository<Sensor, Long> {
 
     @EntityGraph(attributePaths = {"room"})
     Page<Sensor> findByRoom(Room room, Pageable pageable);
+
+    Optional<Sensor> findByMacAddressAndRoom(String macAddress, Room room);
 }

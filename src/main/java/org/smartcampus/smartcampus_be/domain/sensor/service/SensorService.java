@@ -52,8 +52,10 @@ public class SensorService {
     }
 
     @Transactional
-    public void deleteSensor(Long sensorId, DeleteSensorRequest request) {
-        Sensor sensor = sensorRepository.findById(sensorId)
+    public void deleteSensor(DeleteSensorRequest request) {
+        Room room = roomRepository.findByRoomNumber(request.roomNumber())
+                .orElseThrow(() -> new CustomException(ErrorType.ROOM_NOT_FOUND));
+        Sensor sensor = sensorRepository.findByMacAddressAndRoom(request.macAddress(), room)
                 .orElseThrow(() -> new CustomException(ErrorType.SENSOR_NOT_FOUND));
         if (request.deleteReason() != null) {
             sensor.updateDeleteReason(request.deleteReason());

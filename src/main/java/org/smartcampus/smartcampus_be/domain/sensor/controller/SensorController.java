@@ -42,9 +42,9 @@ public class SensorController {
     }
 
     @PreAuthorize("isAuthenticated()")
-    @PostMapping("/delete/{sensorId}")
-    public ApiResponse<?> deleteSensor(@PathVariable Long sensorId, @RequestBody DeleteSensorRequest request) {
-        sensorService.deleteSensor(sensorId, request);
+    @PostMapping("/delete")
+    public ApiResponse<?> deleteSensor(@RequestBody DeleteSensorRequest request) {
+        sensorService.deleteSensor(request);
         return ApiResponse.success(SuccessType.SENSOR_DELETE_SUCCESS);
     }
 }
