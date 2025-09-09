@@ -19,11 +19,18 @@ public class OutlierLogResponse {
     private ActionStatus actionStatus;
     private CheckStatus checkStatus;
     private LocalDateTime createdAt;
-    private Member member;
+    private MemberInfo member;
     
     private SensorInfo sensorInfo;
     private RoomInfo roomInfo;
     private DataTypeInfo dataTypeInfo;
+
+    @Getter
+    @Builder
+    public static class MemberInfo {
+        private Long id;
+        private String name;
+    }
     
     @Getter
     @Builder
@@ -56,7 +63,10 @@ public class OutlierLogResponse {
                 .actionStatus(outlierLog.getActionStatus())
                 .checkStatus(outlierLog.getCheckStatus())
                 .createdAt(outlierLog.getCreatedAt())
-                .member(outlierLog.getMember())
+                .member(MemberInfo.builder()
+                        .id(outlierLog.getMember().getId())
+                        .name(outlierLog.getMember().getName())
+                        .build())
                 .sensorInfo(SensorInfo.builder()
                         .id(outlierLog.getSensorData().getSensor().getId())
                         .macAddress(outlierLog.getSensorData().getSensor().getMacAddress())
