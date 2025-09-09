@@ -5,9 +5,12 @@ import org.smartcampus.smartcampus_be.domain.room.entity.Room;
 import org.smartcampus.smartcampus_be.domain.room.repository.RoomRepository;
 import org.smartcampus.smartcampus_be.domain.sensor.dto.request.CreateSensorRequest;
 import org.smartcampus.smartcampus_be.domain.sensor.dto.request.DeleteSensorRequest;
+import org.smartcampus.smartcampus_be.domain.sensor.dto.response.DataTypeResponse;
 import org.smartcampus.smartcampus_be.domain.sensor.dto.response.PagingSensorResponse;
 import org.smartcampus.smartcampus_be.domain.sensor.dto.response.SensorResponse;
+import org.smartcampus.smartcampus_be.domain.sensor.entity.DataType;
 import org.smartcampus.smartcampus_be.domain.sensor.entity.Sensor;
+import org.smartcampus.smartcampus_be.domain.sensor.repository.DataTypeRepository;
 import org.smartcampus.smartcampus_be.domain.sensor.repository.SensorRepository;
 import org.smartcampus.smartcampus_be.global.exception.CustomException;
 import org.smartcampus.smartcampus_be.global.exception.ErrorType;
@@ -26,6 +29,7 @@ public class SensorService {
 
     private final RoomRepository roomRepository;
     private final SensorRepository sensorRepository;
+    private final DataTypeRepository dataTypeRepository;
 
     @Transactional
     public SensorResponse createSensor(CreateSensorRequest request) {
@@ -61,5 +65,12 @@ public class SensorService {
             sensor.updateDeleteReason(request.deleteReason());
         }
         sensorRepository.delete(sensor);
+    }
+
+    public List<DataTypeResponse> getSensorDataTypes() {
+        List<DataType> dataTypes = dataTypeRepository.findAll();
+        return dataTypes.stream()
+                .map(DataTypeResponse::from)
+                .collect(Collectors.toList());
     }
 }

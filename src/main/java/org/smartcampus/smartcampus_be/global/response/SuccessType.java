@@ -42,6 +42,7 @@ public enum SuccessType {
     SENSOR_CREATE_SUCCESS(HttpStatus.CREATED, "센서 등록에 성공했습니다."),
     SENSOR_LIST_SUCCESS(HttpStatus.OK, "센서 목록 조회에 성공했습니다."),
     SENSOR_DELETE_SUCCESS(HttpStatus.OK, "센서 삭제에 성공했습니다."),
+    SENSOR_DATA_TYPES_SUCCESS(HttpStatus.OK, "센서 데이터 타입 목록 조회에 성공했습니다."),
     ;
 
     private final HttpStatus httpStatus;
