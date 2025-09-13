@@ -19,6 +19,7 @@ public enum SuccessType {
     MEMBER_UPDATE_SUCCESS(HttpStatus.OK, "관리자 계정이 수정되었습니다."),
     MEMBER_DELETE_SUCCESS(HttpStatus.OK, "관리자 계정이 삭제되었습니다."),
     MEMBER_GET_SUCCESS(HttpStatus.OK, "관리자 계정 리스트 조회에 성공했습니다."),
+    MEMBER_DETAIL_SUCCESS(HttpStatus.OK, "관리자 계정 상세 조회에 성공했습니다."),
 
     /**
      * ROOM

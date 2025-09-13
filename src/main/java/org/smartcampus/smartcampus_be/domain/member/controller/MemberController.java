@@ -57,5 +57,11 @@ public class MemberController {
     public ResponseEntity<ApiResponse<List<MemberListResponseDto>>> getAllMembers() {
         return ResponseEntity.ok(ApiResponse.success(SuccessType.MEMBER_GET_SUCCESS, memberService.getAllMembers()));
     }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/members/{id}")
+    public ResponseEntity<ApiResponse<MemberListResponseDto>> getMember(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(SuccessType.MEMBER_DETAIL_SUCCESS, memberService.getMember(id)));
+    }
 }
 

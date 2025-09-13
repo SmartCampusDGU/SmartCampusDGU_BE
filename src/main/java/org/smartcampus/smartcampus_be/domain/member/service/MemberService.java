@@ -111,4 +111,16 @@ public class MemberService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public MemberListResponseDto getMember(Long id) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorType.MEMBER_NOT_FOUND));
+        return new MemberListResponseDto(
+                member.getUsername(),
+                member.getPassword(),
+                member.getName(),
+                member.getDescription()
+        );
+    }
+
 }
