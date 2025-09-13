@@ -6,12 +6,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
 public interface SensorRepository extends JpaRepository<Sensor, Long> {
 
-    Optional<Sensor> findByMacAddress(String macAddress);
+    @Query("SELECT s FROM Sensor s JOIN FETCH s.room r JOIN FETCH r.roomType WHERE s.macAddress = :macAddress")
+    Optional<Sensor> findByMacAddress(@Param("macAddress") String macAddress);
 
     @EntityGraph(attributePaths = {"room"})
     Page<Sensor> findByRoom(Room room, Pageable pageable);
