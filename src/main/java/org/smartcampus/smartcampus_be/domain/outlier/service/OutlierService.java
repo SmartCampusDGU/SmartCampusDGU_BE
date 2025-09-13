@@ -108,7 +108,7 @@ public class OutlierService {
     private boolean isDuplicateOutlier(SensorData sensorData, OutlierLevel level) {
         Long sensorId = sensorData.getSensor().getId();
         Long dataTypeId = sensorData.getDataType().getId();
-        LocalDateTime timeThreshold = LocalDateTime.now().minusMinutes(DUPLICATE_PREVENTION_MINUTES);
+        LocalDateTime timeThreshold = sensorData.getCreatedAt().minusMinutes(DUPLICATE_PREVENTION_MINUTES);
         
         List<OutlierLog> recentOutliers = outlierLogRepository
                 .findRecentOutlierBySensorAndDataTypeAndLevel(sensorId, dataTypeId, level, timeThreshold);

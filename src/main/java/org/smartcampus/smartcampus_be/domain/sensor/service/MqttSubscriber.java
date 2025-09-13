@@ -18,6 +18,7 @@ import org.smartcampus.smartcampus_be.domain.sensor.repository.SensorRepository;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -77,42 +78,7 @@ public class MqttSubscriber {
                 try {
                     String payload = new String(message.getPayload());
                     logger.info("메시지 도착 - 토픽: {}, 페이로드: {}", topic, payload);
-                    String dataTypeName = topic.substring(topic.lastIndexOf('/') + 1);
-                    DataType dataType = dataTypeRepository.findByName(dataTypeName).orElseGet(() -> {
-                        logger.debug("데이터 타입이 데이터베이스에 없음: {}", dataTypeName);
-                        DataType newDataType = DataType.builder()
-                                .name(dataTypeName)
-                                .unit(guessUnit(dataTypeName))
-                                .build();
-                        return dataTypeRepository.save(newDataType);
-                    });
-
-                    ObjectMapper mapper = new ObjectMapper();
-                    JsonNode jsonNode = mapper.readTree(payload);
-
-                    String macAddress = extractMacAddressFromTopic(topic);
-                    Optional<Sensor> sensorOpt = sensorRepository.findByMacAddress(macAddress);
-                    if (sensorOpt.isEmpty()) {
-                        logger.warn("미등록 센서에서 메시지 수신 - MAC: {}, 토픽: {}", macAddress, topic);
-                        return; // 메시지 무시하고 다음 메시지 처리 계속
-                    }
-                    Sensor sensor = sensorOpt.get();
-                    LocalDateTime timestamp = parseTimestamp(jsonNode.get("ts").asText());
-                    String value = getValueFromJsonNode(dataTypeName, jsonNode);
-
-                    SensorData sensorData = SensorData.builder()
-                            .sensor(sensor)
-                            .dataType(dataType)
-                            .value(value)
-                            .createdAt(timestamp)
-                            .build();
-
-                    sensorDataRepository.save(sensorData);
-                    
-                    // 이상치 감지 및 저장
-                    outlierService.detectAndSaveOutlier(sensorData);
-
-                    logger.info("{} data saved: {}", dataType, sensorData);
+                    processMessage(topic, payload);
                 } catch (Exception e) {
                     logger.error("메시지 처리 중 오류 발생: {}", e.getMessage(), e);
                 }
@@ -121,6 +87,45 @@ public class MqttSubscriber {
         logger.info("MQTT 구독 시작: {}", TOPIC_FILTER);
     }
 
+    @Transactional
+    public void processMessage(String topic, String payload) throws Exception {
+        String dataTypeName = topic.substring(topic.lastIndexOf('/') + 1);
+        DataType dataType = dataTypeRepository.findByName(dataTypeName).orElseGet(() -> {
+            logger.debug("데이터 타입이 데이터베이스에 없음: {}", dataTypeName);
+            DataType newDataType = DataType.builder()
+                    .name(dataTypeName)
+                    .unit(guessUnit(dataTypeName))
+                    .build();
+            return dataTypeRepository.save(newDataType);
+        });
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode jsonNode = mapper.readTree(payload);
+
+        String macAddress = extractMacAddressFromTopic(topic);
+        Optional<Sensor> sensorOpt = sensorRepository.findByMacAddress(macAddress);
+        if (sensorOpt.isEmpty()) {
+            logger.warn("미등록 센서에서 메시지 수신 - MAC: {}, 토픽: {}", macAddress, topic);
+            return; // 메시지 무시하고 다음 메시지 처리 계속
+        }
+        Sensor sensor = sensorOpt.get();
+        LocalDateTime timestamp = parseTimestamp(jsonNode.get("ts").asText());
+        String value = getValueFromJsonNode(dataTypeName, jsonNode);
+
+        SensorData sensorData = SensorData.builder()
+                .sensor(sensor)
+                .dataType(dataType)
+                .value(value)
+                .createdAt(timestamp)
+                .build();
+
+        sensorDataRepository.save(sensorData);
+
+        // 이상치 감지 및 저장
+        outlierService.detectAndSaveOutlier(sensorData);
+
+        logger.info("{} data saved: {}", dataType, sensorData);
+    }
 
     private String extractMacAddressFromTopic(String topic) {
         String[] parts = topic.split("/");
