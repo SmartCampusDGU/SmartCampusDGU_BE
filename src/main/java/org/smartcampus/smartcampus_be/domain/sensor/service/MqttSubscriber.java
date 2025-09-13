@@ -39,6 +39,12 @@ public class MqttSubscriber {
     @Value("${mqtt.broker-url}")
     private String BROKER_URL;
 
+    @Value("${mqtt.username:}")
+    private String MQTT_USERNAME;
+
+    @Value("${mqtt.password:}")
+    private String MQTT_PASSWORD;
+
     private MqttClient mqttClient;
 
     @PostConstruct
@@ -47,6 +53,13 @@ public class MqttSubscriber {
             mqttClient = new MqttClient(BROKER_URL, clientId);
             MqttConnectOptions options = new MqttConnectOptions();
             options.setCleanSession(true);
+
+            if (MQTT_USERNAME != null && !MQTT_USERNAME.isEmpty()) {
+                options.setUserName(MQTT_USERNAME);
+            }
+            if (MQTT_PASSWORD != null && !MQTT_PASSWORD.isEmpty()) {
+                options.setPassword(MQTT_PASSWORD.toCharArray());
+            }
 
             mqttClient.connect(options);
             logger.info("MQTT 브로커에 연결 성공: {}", BROKER_URL);
