@@ -14,8 +14,8 @@ import org.smartcampus.smartcampus_be.domain.sensor.entity.SensorData;
 import org.smartcampus.smartcampus_be.domain.sensor.repository.DataTypeRepository;
 import org.smartcampus.smartcampus_be.domain.sensor.repository.SensorDataRepository;
 import org.smartcampus.smartcampus_be.domain.sensor.repository.SensorRepository;
-import org.smartcampus.smartcampus_be.global.exception.CustomException;
-import org.smartcampus.smartcampus_be.global.exception.ErrorType;
+
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -91,8 +91,12 @@ public class MqttSubscriber {
                     JsonNode jsonNode = mapper.readTree(payload);
 
                     String macAddress = extractMacAddressFromTopic(topic);
-                    Sensor sensor = sensorRepository.findByMacAddress(macAddress)
-                            .orElseThrow(() -> new CustomException(ErrorType.SENSOR_NOT_FOUND));
+                    Optional<Sensor> sensorOpt = sensorRepository.findByMacAddress(macAddress);
+                    if (sensorOpt.isEmpty()) {
+                        logger.warn("미등록 센서에서 메시지 수신 - MAC: {}, 토픽: {}", macAddress, topic);
+                        return; // 메시지 무시하고 다음 메시지 처리 계속
+                    }
+                    Sensor sensor = sensorOpt.get();
                     LocalDateTime timestamp = parseTimestamp(jsonNode.get("ts").asText());
                     String value = getValueFromJsonNode(dataTypeName, jsonNode);
 
@@ -151,8 +155,11 @@ public class MqttSubscriber {
                 return jsonNode.get("buttonPressed").toString();
             case "PM2_5MassConcentration":
                 return jsonNode.get("PM2_5MassConcentration").toString();
+            case "missedConnections":
+                return jsonNode.get("missedConnections").toString();
             default:
-                throw new IllegalArgumentException("Unknown sensor type: " + dataTypeName);
+                logger.warn("알 수 없는 센서 타입: {}", dataTypeName);
+                return jsonNode.toString(); // 전체 JSON을 문자열로 저장
         }
     }
 
@@ -165,6 +172,7 @@ public class MqttSubscriber {
             case "iaqIndex" -> "index";
             case "usbPowered", "buttonPressed" -> "boolean";
             case "PM2_5MassConcentration" -> "µg/m³";
+            case "missedConnections" -> "count";
             default -> "unknown";
         };
     }
