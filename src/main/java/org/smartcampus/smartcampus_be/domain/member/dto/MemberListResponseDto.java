@@ -6,8 +6,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class MemberListResponseDto {
+    private Long id;
     private String username;
-    private String password;
     private String name;
     private String description;
 }

@@ -103,8 +103,8 @@ public class MemberService {
 
         return memberRepository.findAll().stream()
                 .map(member -> new MemberListResponseDto(
+                        member.getId(),
                         member.getUsername(),
-                        member.getPassword(),
                         member.getName(),
                         member.getDescription()
                 ))
@@ -116,8 +116,8 @@ public class MemberService {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorType.MEMBER_NOT_FOUND));
         return new MemberListResponseDto(
+                member.getId(),
                 member.getUsername(),
-                member.getPassword(),
                 member.getName(),
                 member.getDescription()
         );
