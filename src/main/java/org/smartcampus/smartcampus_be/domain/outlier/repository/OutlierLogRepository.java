@@ -80,6 +80,7 @@ public interface OutlierLogRepository extends JpaRepository<OutlierLog, Long> {
     Long countByMemberAndLevel(@Param("member") Member member, @Param("level") OutlierLevel level);
     
     @Query("SELECT o FROM OutlierLog o " +
+           "LEFT JOIN FETCH o.member " +
            "JOIN FETCH o.sensorData sd " +
            "JOIN FETCH sd.sensor s " +
            "JOIN FETCH s.room r " +
@@ -94,6 +95,7 @@ public interface OutlierLogRepository extends JpaRepository<OutlierLog, Long> {
     Long countByLevel(@Param("level") OutlierLevel level);
     
     @Query("SELECT o FROM OutlierLog o " +
+           "LEFT JOIN FETCH o.member " +
            "JOIN FETCH o.sensorData sd " +
            "JOIN FETCH sd.sensor s " +
            "JOIN FETCH s.room r " +

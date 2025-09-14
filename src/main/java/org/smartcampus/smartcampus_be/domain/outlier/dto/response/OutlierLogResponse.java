@@ -2,7 +2,6 @@ package org.smartcampus.smartcampus_be.domain.outlier.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;
-import org.smartcampus.smartcampus_be.domain.member.entity.Member;
 import org.smartcampus.smartcampus_be.domain.outlier.entity.ActionStatus;
 import org.smartcampus.smartcampus_be.domain.outlier.entity.CheckStatus;
 import org.smartcampus.smartcampus_be.domain.outlier.entity.OutlierLevel;
@@ -63,10 +62,10 @@ public class OutlierLogResponse {
                 .actionStatus(outlierLog.getActionStatus())
                 .checkStatus(outlierLog.getCheckStatus())
                 .createdAt(outlierLog.getCreatedAt())
-                .member(MemberInfo.builder()
+                .member(outlierLog.getMember() != null ? MemberInfo.builder()
                         .id(outlierLog.getMember().getId())
                         .name(outlierLog.getMember().getName())
-                        .build())
+                        .build() : null)
                 .sensorInfo(SensorInfo.builder()
                         .id(outlierLog.getSensorData().getSensor().getId())
                         .macAddress(outlierLog.getSensorData().getSensor().getMacAddress())
