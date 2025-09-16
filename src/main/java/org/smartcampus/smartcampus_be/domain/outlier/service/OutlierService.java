@@ -36,17 +36,21 @@ public class OutlierService {
     
     // 중복 방지 시간 (분)
     private static final int DUPLICATE_PREVENTION_MINUTES = 180;
+    private static final int MONITORING_DURATION_MINUTES = 180;
     
     @Transactional
     public void detectAndSaveOutlier(SensorData sensorData) {
         OutlierLevel level = detectOutlierLevel(sensorData);
-        
+
         if (level != OutlierLevel.SAFE) {
+            // 모니터링 중인 완료된 이상치 로그 처리
+            handleMonitoringOutliers(sensorData, level);
+
             // 중복 방지: 최근 N분 내에 동일한 센서+데이터타입+레벨의 이상치가 있는지 확인
             if (isDuplicateOutlier(sensorData, level)) {
                 return; // 중복이면 저장하지 않음
             }
-            
+
             OutlierLog outlierLog = OutlierLog.builder()
                     .member(null)
                     .sensorData(sensorData)
@@ -55,8 +59,11 @@ public class OutlierService {
                     .checkStatus(CheckStatus.UNCONFIRMED)
                     .actionStatus(ActionStatus.NONE)
                     .build();
-            
+
             outlierLogRepository.save(outlierLog);
+        } else {
+            // 데이터가 양호할 때 모니터링 중인 완료된 이상치 로그 삭제
+            deleteMonitoringOutliersIfSafe(sensorData);
         }
     }
     
@@ -112,11 +119,12 @@ public class OutlierService {
     private boolean isDuplicateOutlier(SensorData sensorData, OutlierLevel level) {
         Long sensorId = sensorData.getSensor().getId();
         Long dataTypeId = sensorData.getDataType().getId();
-        LocalDateTime timeThreshold = sensorData.getCreatedAt().minusMinutes(DUPLICATE_PREVENTION_MINUTES);
-        
+        LocalDateTime timeThreshold = sensorData.getCreatedAt()
+                .minusMinutes(DUPLICATE_PREVENTION_MINUTES);
+
         List<OutlierLog> recentOutliers = outlierLogRepository
                 .findRecentOutlierBySensorAndDataTypeAndLevel(sensorId, dataTypeId, level, timeThreshold);
-        
+
         return !recentOutliers.isEmpty();
     }
     
@@ -137,15 +145,20 @@ public class OutlierService {
         if (outlierLog.getMember() == null) {
             outlierLog.assignMember(member);
         }
-        
+
         if (request.getCheckStatus() != null) {
             outlierLog.updateCheckStatus(request.getCheckStatus());
         }
-        
+
         if (request.getActionStatus() != null) {
-            outlierLog.updateActionStatus(request.getActionStatus());
+            if (request.getActionStatus() == ActionStatus.COMPLETED) {
+                // COMPLETED 상태로 변경 시 모니터링 설정
+                outlierLog.markAsCompleted();
+            } else {
+                outlierLog.updateActionStatus(request.getActionStatus());
+            }
         }
-        
+
         return outlierLog;
     }
     
@@ -170,5 +183,57 @@ public class OutlierService {
     
     public Long getAllOutlierCountByLevel(OutlierLevel level) {
         return outlierLogRepository.countByLevel(level);
+    }
+
+    private void handleMonitoringOutliers(SensorData sensorData, OutlierLevel level) {
+        Long sensorId = sensorData.getSensor().getId();
+        Long dataTypeId = sensorData.getDataType().getId();
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        List<OutlierLog> monitoringOutliers = outlierLogRepository
+                .findMonitoringOutliersBySensorAndDataType(sensorId, dataTypeId, currentTime);
+
+        for (OutlierLog monitoringOutlier : monitoringOutliers) {
+            if (monitoringOutlier.isMonitoringExpired(MONITORING_DURATION_MINUTES)) {
+                // 모니터링 기간이 만료되었으므로 새로운 이상치로 간주
+                outlierLogRepository.delete(monitoringOutlier);
+
+                // 새로운 이상치 로그 생성 (기존 담당자 정보 유지)
+                OutlierLog newOutlierLog = OutlierLog.builder()
+                        .member(monitoringOutlier.getMember())
+                        .sensorData(sensorData)
+                        .value(Double.parseDouble(sensorData.getValue()))
+                        .level(level)
+                        .checkStatus(CheckStatus.UNCONFIRMED)
+                        .actionStatus(ActionStatus.NONE)
+                        .build();
+
+                outlierLogRepository.save(newOutlierLog);
+            }
+        }
+    }
+
+    private void deleteMonitoringOutliersIfSafe(SensorData sensorData) {
+        Long sensorId = sensorData.getSensor().getId();
+        Long dataTypeId = sensorData.getDataType().getId();
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        List<OutlierLog> monitoringOutliers = outlierLogRepository
+                .findMonitoringOutliersBySensorAndDataType(sensorId, dataTypeId, currentTime);
+
+        if (!monitoringOutliers.isEmpty()) {
+            outlierLogRepository.deleteAll(monitoringOutliers);
+        }
+    }
+
+    @Transactional
+    public void cleanupExpiredMonitoringOutliers() {
+        LocalDateTime currentTime = LocalDateTime.now();
+        List<OutlierLog> expiredOutliers = outlierLogRepository
+                .findCompletedOutliersWithExpiredMonitoring(currentTime);
+
+        if (!expiredOutliers.isEmpty()) {
+            outlierLogRepository.deleteAll(expiredOutliers);
+        }
     }
 }

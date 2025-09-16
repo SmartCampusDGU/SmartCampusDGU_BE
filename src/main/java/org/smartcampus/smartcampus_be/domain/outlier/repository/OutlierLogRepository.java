@@ -123,4 +123,20 @@ public interface OutlierLogRepository extends JpaRepository<OutlierLog, Long> {
                                                                    @Param("dataTypeId") Long dataTypeId,
                                                                    @Param("level") OutlierLevel level,
                                                                    @Param("timeThreshold") LocalDateTime timeThreshold);
+
+    @Query("SELECT o FROM OutlierLog o " +
+           "WHERE o.actionStatus = 'COMPLETED' " +
+           "AND o.completedAt IS NOT NULL " +
+           "AND o.monitoringEndAt <= :currentTime")
+    List<OutlierLog> findCompletedOutliersWithExpiredMonitoring(@Param("currentTime") LocalDateTime currentTime);
+
+    @Query("SELECT o FROM OutlierLog o " +
+           "WHERE o.sensorData.sensor.id = :sensorId " +
+           "AND o.sensorData.dataType.id = :dataTypeId " +
+           "AND o.actionStatus = 'COMPLETED' " +
+           "AND o.monitoringEndAt IS NOT NULL " +
+           "AND o.monitoringEndAt > :currentTime")
+    List<OutlierLog> findMonitoringOutliersBySensorAndDataType(@Param("sensorId") Long sensorId,
+                                                               @Param("dataTypeId") Long dataTypeId,
+                                                               @Param("currentTime") LocalDateTime currentTime);
 }

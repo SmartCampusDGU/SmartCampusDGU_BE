@@ -9,6 +9,8 @@ import org.smartcampus.smartcampus_be.domain.member.entity.Member;
 import org.smartcampus.smartcampus_be.domain.sensor.entity.SensorData;
 import org.smartcampus.smartcampus_be.global.common.domain.BaseTimeEntity;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -40,6 +42,10 @@ public class OutlierLog extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CheckStatus checkStatus;
+
+    @Column(name = "completed_at")
+    private LocalDateTime completedAt;
+
     
     @Builder
     public OutlierLog(Member member, SensorData sensorData, Double value, OutlierLevel level, ActionStatus actionStatus, CheckStatus checkStatus) {
@@ -50,16 +56,25 @@ public class OutlierLog extends BaseTimeEntity {
         this.actionStatus = actionStatus;
         this.checkStatus = checkStatus;
     }
-    
+
     public void updateCheckStatus(CheckStatus checkStatus) {
         this.checkStatus = checkStatus;
     }
-    
+
     public void updateActionStatus(ActionStatus actionStatus) {
         this.actionStatus = actionStatus;
     }
-    
+
+    public void markAsCompleted() {
+        this.actionStatus = ActionStatus.COMPLETED;
+        this.completedAt = LocalDateTime.now();
+    }
+
     public void assignMember(Member member) {
         this.member = member;
+    }
+
+    public boolean isMonitoringExpired(int monitoringDurationMinutes) {
+        return completedAt != null && LocalDateTime.now().isAfter(completedAt.plusMinutes(monitoringDurationMinutes));
     }
 }
