@@ -188,10 +188,12 @@ public class OutlierService {
     private void handleMonitoringOutliers(SensorData sensorData, OutlierLevel level) {
         Long sensorId = sensorData.getSensor().getId();
         Long dataTypeId = sensorData.getDataType().getId();
-        LocalDateTime currentTime = LocalDateTime.now();
 
         List<OutlierLog> monitoringOutliers = outlierLogRepository
-                .findMonitoringOutliersBySensorAndDataType(sensorId, dataTypeId, currentTime);
+                .findMonitoringOutliersBySensorAndDataType(sensorId, dataTypeId)
+                .stream()
+                .filter(outlier -> !outlier.isMonitoringExpired(MONITORING_DURATION_MINUTES))
+                .toList();
 
         for (OutlierLog monitoringOutlier : monitoringOutliers) {
             if (monitoringOutlier.isMonitoringExpired(MONITORING_DURATION_MINUTES)) {
@@ -216,10 +218,12 @@ public class OutlierService {
     private void deleteMonitoringOutliersIfSafe(SensorData sensorData) {
         Long sensorId = sensorData.getSensor().getId();
         Long dataTypeId = sensorData.getDataType().getId();
-        LocalDateTime currentTime = LocalDateTime.now();
 
         List<OutlierLog> monitoringOutliers = outlierLogRepository
-                .findMonitoringOutliersBySensorAndDataType(sensorId, dataTypeId, currentTime);
+                .findMonitoringOutliersBySensorAndDataType(sensorId, dataTypeId)
+                .stream()
+                .filter(outlier -> !outlier.isMonitoringExpired(MONITORING_DURATION_MINUTES))
+                .toList();
 
         if (!monitoringOutliers.isEmpty()) {
             outlierLogRepository.deleteAll(monitoringOutliers);
@@ -228,9 +232,11 @@ public class OutlierService {
 
     @Transactional
     public void cleanupExpiredMonitoringOutliers() {
-        LocalDateTime currentTime = LocalDateTime.now();
         List<OutlierLog> expiredOutliers = outlierLogRepository
-                .findCompletedOutliersWithExpiredMonitoring(currentTime);
+                .findCompletedOutliersForMonitoring()
+                .stream()
+                .filter(outlier -> outlier.isMonitoringExpired(MONITORING_DURATION_MINUTES))
+                .toList();
 
         if (!expiredOutliers.isEmpty()) {
             outlierLogRepository.deleteAll(expiredOutliers);
