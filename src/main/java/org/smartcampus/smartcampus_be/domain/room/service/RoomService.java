@@ -105,6 +105,20 @@ public class RoomService {
     public RoomResponse updateRoom(Long roomId, UpdateRoomRequest request) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new CustomException(ErrorType.ROOM_NOT_FOUND));
+
+        // roomNumber 업데이트
+        if (request.roomNumber() != null) {
+            room.updateRoomNumber(request.roomNumber());
+        }
+
+        // roomType 업데이트
+        if (request.roomTypeId() != null) {
+            RoomType roomType = roomTypeRepository.findById(request.roomTypeId())
+                    .orElseThrow(() -> new CustomException(ErrorType.ROOM_TYPE_NOT_FOUND));
+            room.updateRoomType(roomType);
+        }
+
+        // dataTypes 업데이트
         room.getRoomDataThresholds().clear();
         if (request.dataTypes() != null && !request.dataTypes().isEmpty()) {
             List<Long> dataTypeIds = request.dataTypes().stream()

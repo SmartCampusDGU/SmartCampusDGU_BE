@@ -36,4 +36,16 @@ public class Room extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Sensor> sensors = new ArrayList<>();
+
+    public void updateRoomNumber(String roomNumber) {
+        if (roomNumber != null && !roomNumber.trim().isEmpty()) {
+            this.roomNumber = roomNumber;
+        }
+    }
+
+    public void updateRoomType(RoomType roomType) {
+        if (roomType != null) {
+            this.roomType = roomType;
+        }
+    }
 }
