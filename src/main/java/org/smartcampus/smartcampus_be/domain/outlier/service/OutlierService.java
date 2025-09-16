@@ -2,6 +2,7 @@ package org.smartcampus.smartcampus_be.domain.outlier.service;
 
 import lombok.RequiredArgsConstructor;
 import org.smartcampus.smartcampus_be.domain.member.entity.Member;
+import org.smartcampus.smartcampus_be.domain.member.repository.MemberRepository;
 import org.smartcampus.smartcampus_be.domain.outlier.dto.request.OutlierSearchRequest;
 import org.smartcampus.smartcampus_be.domain.outlier.dto.request.UpdateOutlierStatusRequest;
 import org.smartcampus.smartcampus_be.domain.outlier.entity.*;
@@ -12,6 +13,8 @@ import org.smartcampus.smartcampus_be.domain.room.repository.RoomDataThresholdRe
 import org.smartcampus.smartcampus_be.domain.room.repository.RoomTypeDataThresholdRepository;
 import org.smartcampus.smartcampus_be.domain.sensor.entity.DataType;
 import org.smartcampus.smartcampus_be.domain.sensor.entity.SensorData;
+import org.smartcampus.smartcampus_be.global.exception.CustomException;
+import org.smartcampus.smartcampus_be.global.exception.ErrorType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,10 +28,11 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class OutlierService {
-    
+
     private final OutlierLogRepository outlierLogRepository;
     private final RoomDataThresholdRepository roomDataThresholdRepository;
     private final RoomTypeDataThresholdRepository roomTypeDataThresholdRepository;
+    private final MemberRepository memberRepository;
     
     // 중복 방지 시간 (분)
     private static final int DUPLICATE_PREVENTION_MINUTES = 180;
@@ -116,17 +120,19 @@ public class OutlierService {
         return !recentOutliers.isEmpty();
     }
     
-    public OutlierLog getOutlierLogById(Long outlierLogId, Member member) {
+    public OutlierLog getOutlierLogById(Long outlierLogId, Long memberId) {
         OutlierLog outlierLog = outlierLogRepository.findById(outlierLogId)
                 .orElseThrow(() -> new IllegalArgumentException("OutlierLog not found with id: " + outlierLogId));
-        
+
         return outlierLog;
     }
     
     @Transactional
-    public OutlierLog updateOutlierStatus(Long outlierLogId, Member member, UpdateOutlierStatusRequest request) {
-        OutlierLog outlierLog = getOutlierLogById(outlierLogId, member);
-        
+    public OutlierLog updateOutlierStatus(Long outlierLogId, Long memberId, UpdateOutlierStatusRequest request) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorType.MEMBER_NOT_FOUND));
+        OutlierLog outlierLog = getOutlierLogById(outlierLogId, memberId);
+
         // 상태 업데이트 시 조치 담당자 할당
         if (outlierLog.getMember() == null) {
             outlierLog.assignMember(member);

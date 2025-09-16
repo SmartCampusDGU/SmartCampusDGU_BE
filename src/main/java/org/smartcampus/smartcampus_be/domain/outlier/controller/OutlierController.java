@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.smartcampus.smartcampus_be.domain.member.entity.Member;
 import org.smartcampus.smartcampus_be.domain.outlier.dto.request.OutlierSearchRequest;
 import org.smartcampus.smartcampus_be.domain.outlier.dto.request.UpdateOutlierStatusRequest;
 import org.smartcampus.smartcampus_be.domain.outlier.dto.response.OutlierLogResponse;
@@ -81,9 +80,9 @@ public class OutlierController {
     @GetMapping("/{outlierLogId}")
     public ApiResponse<OutlierLogResponse> getOutlierLog(
             @Parameter(description = "이상치 로그 ID") @PathVariable Long outlierLogId,
-            @Parameter(hidden = true) @AuthenticationPrincipal Member member) {
-        
-        OutlierLog outlierLog = outlierService.getOutlierLogById(outlierLogId, member);
+            @Parameter(hidden = true) @AuthenticationPrincipal Long memberId) {
+
+        OutlierLog outlierLog = outlierService.getOutlierLogById(outlierLogId, memberId);
         OutlierLogResponse response = OutlierLogResponse.from(outlierLog);
         return ApiResponse.success(SuccessType.PROCESS_SUCCESS, response);
     }
@@ -100,9 +99,9 @@ public class OutlierController {
     public ApiResponse<OutlierLogResponse> updateOutlierStatus(
             @Parameter(description = "이상치 로그 ID") @PathVariable Long outlierLogId,
             @Parameter(description = "업데이트할 상태 정보") @RequestBody @Valid UpdateOutlierStatusRequest request,
-            @Parameter(hidden = true) @AuthenticationPrincipal Member member) {
-        
-        OutlierLog outlierLog = outlierService.updateOutlierStatus(outlierLogId, member, request);
+            @Parameter(hidden = true) @AuthenticationPrincipal Long memberId) {
+
+        OutlierLog outlierLog = outlierService.updateOutlierStatus(outlierLogId, memberId, request);
         OutlierLogResponse response = OutlierLogResponse.from(outlierLog);
         return ApiResponse.success(SuccessType.PROCESS_SUCCESS, response);
     }
