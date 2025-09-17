@@ -33,10 +33,7 @@ public class OutlierService {
     private final RoomDataThresholdRepository roomDataThresholdRepository;
     private final RoomTypeDataThresholdRepository roomTypeDataThresholdRepository;
     private final MemberRepository memberRepository;
-    
-    // 중복 방지 시간 (분)
-    private static final int DUPLICATE_PREVENTION_MINUTES = 180;
-    private static final int MONITORING_DURATION_MINUTES = 180;
+    private final OutlierSettingsService outlierSettingsService;
     
     @Transactional
     public void detectAndSaveOutlier(SensorData sensorData) {
@@ -120,7 +117,7 @@ public class OutlierService {
         Long sensorId = sensorData.getSensor().getId();
         Long dataTypeId = sensorData.getDataType().getId();
         LocalDateTime timeThreshold = sensorData.getCreatedAt()
-                .minusMinutes(DUPLICATE_PREVENTION_MINUTES);
+                .minusMinutes(outlierSettingsService.getDuplicatePreventionMinutes());
 
         List<OutlierLog> recentOutliers = outlierLogRepository
                 .findRecentOutlierBySensorAndDataTypeAndLevel(sensorId, dataTypeId, level, timeThreshold);
@@ -192,11 +189,11 @@ public class OutlierService {
         List<OutlierLog> monitoringOutliers = outlierLogRepository
                 .findMonitoringOutliersBySensorAndDataType(sensorId, dataTypeId)
                 .stream()
-                .filter(outlier -> !outlier.isMonitoringExpired(MONITORING_DURATION_MINUTES))
+                .filter(outlier -> !outlier.isMonitoringExpired(outlierSettingsService.getMonitoringDurationMinutes()))
                 .toList();
 
         for (OutlierLog monitoringOutlier : monitoringOutliers) {
-            if (monitoringOutlier.isMonitoringExpired(MONITORING_DURATION_MINUTES)) {
+            if (monitoringOutlier.isMonitoringExpired(outlierSettingsService.getMonitoringDurationMinutes())) {
                 // 모니터링 기간이 만료되었으므로 새로운 이상치로 간주
                 outlierLogRepository.delete(monitoringOutlier);
 
@@ -222,7 +219,7 @@ public class OutlierService {
         List<OutlierLog> monitoringOutliers = outlierLogRepository
                 .findMonitoringOutliersBySensorAndDataType(sensorId, dataTypeId)
                 .stream()
-                .filter(outlier -> !outlier.isMonitoringExpired(MONITORING_DURATION_MINUTES))
+                .filter(outlier -> !outlier.isMonitoringExpired(outlierSettingsService.getMonitoringDurationMinutes()))
                 .toList();
 
         if (!monitoringOutliers.isEmpty()) {
@@ -235,7 +232,7 @@ public class OutlierService {
         List<OutlierLog> expiredOutliers = outlierLogRepository
                 .findCompletedOutliersForMonitoring()
                 .stream()
-                .filter(outlier -> outlier.isMonitoringExpired(MONITORING_DURATION_MINUTES))
+                .filter(outlier -> outlier.isMonitoringExpired(outlierSettingsService.getMonitoringDurationMinutes()))
                 .toList();
 
         if (!expiredOutliers.isEmpty()) {
