@@ -49,7 +49,9 @@ public class OutlierSettingsController {
 
         OutlierSettings settings = outlierSettingsService.updateSettings(
                 request.getMonitoringDurationMinutes(),
-                request.getDuplicatePreventionMinutes()
+                request.getDuplicatePreventionMinutes(),
+                request.getDangerNotificationMinutes(),
+                request.getCautionNotificationMinutes()
         );
 
         OutlierSettingsResponse response = OutlierSettingsResponse.from(settings);

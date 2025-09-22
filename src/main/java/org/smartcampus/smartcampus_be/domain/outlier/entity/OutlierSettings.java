@@ -23,18 +23,34 @@ public class OutlierSettings extends BaseTimeEntity {
     @Column(name = "duplicate_prevention_minutes", nullable = false)
     private Integer duplicatePreventionMinutes;
 
+    @Column(name = "danger_notification_minutes", nullable = false)
+    private Integer dangerNotificationMinutes;
+
+    @Column(name = "caution_notification_minutes", nullable = false)
+    private Integer cautionNotificationMinutes;
+
     @Builder
-    public OutlierSettings(Integer monitoringDurationMinutes, Integer duplicatePreventionMinutes) {
+    public OutlierSettings(Integer monitoringDurationMinutes, Integer duplicatePreventionMinutes,
+                          Integer dangerNotificationMinutes, Integer cautionNotificationMinutes) {
         this.monitoringDurationMinutes = monitoringDurationMinutes;
         this.duplicatePreventionMinutes = duplicatePreventionMinutes;
+        this.dangerNotificationMinutes = dangerNotificationMinutes;
+        this.cautionNotificationMinutes = cautionNotificationMinutes;
     }
 
-    public void updateSettings(Integer monitoringDurationMinutes, Integer duplicatePreventionMinutes) {
+    public void updateSettings(Integer monitoringDurationMinutes, Integer duplicatePreventionMinutes,
+                              Integer dangerNotificationMinutes, Integer cautionNotificationMinutes) {
         if (monitoringDurationMinutes != null) {
             this.monitoringDurationMinutes = monitoringDurationMinutes;
         }
         if (duplicatePreventionMinutes != null) {
             this.duplicatePreventionMinutes = duplicatePreventionMinutes;
+        }
+        if (dangerNotificationMinutes != null) {
+            this.dangerNotificationMinutes = dangerNotificationMinutes;
+        }
+        if (cautionNotificationMinutes != null) {
+            this.cautionNotificationMinutes = cautionNotificationMinutes;
         }
     }
 
@@ -42,6 +58,8 @@ public class OutlierSettings extends BaseTimeEntity {
         return OutlierSettings.builder()
                 .monitoringDurationMinutes(180)
                 .duplicatePreventionMinutes(180)
+                .dangerNotificationMinutes(60)
+                .cautionNotificationMinutes(120)
                 .build();
     }
 }

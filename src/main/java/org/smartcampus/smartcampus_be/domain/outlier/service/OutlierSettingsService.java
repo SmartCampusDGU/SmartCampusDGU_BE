@@ -22,9 +22,11 @@ public class OutlierSettingsService {
     }
 
     @Transactional
-    public OutlierSettings updateSettings(Integer monitoringDurationMinutes, Integer duplicatePreventionMinutes) {
+    public OutlierSettings updateSettings(Integer monitoringDurationMinutes, Integer duplicatePreventionMinutes,
+                                         Integer dangerNotificationMinutes, Integer cautionNotificationMinutes) {
         OutlierSettings settings = getSettings();
-        settings.updateSettings(monitoringDurationMinutes, duplicatePreventionMinutes);
+        settings.updateSettings(monitoringDurationMinutes, duplicatePreventionMinutes,
+                               dangerNotificationMinutes, cautionNotificationMinutes);
         return settings;
     }
 
@@ -34,5 +36,13 @@ public class OutlierSettingsService {
 
     public Integer getDuplicatePreventionMinutes() {
         return getSettings().getDuplicatePreventionMinutes();
+    }
+
+    public Integer getDangerNotificationMinutes() {
+        return getSettings().getDangerNotificationMinutes();
+    }
+
+    public Integer getCautionNotificationMinutes() {
+        return getSettings().getCautionNotificationMinutes();
     }
 }

@@ -116,13 +116,22 @@ public class OutlierService {
     private boolean isDuplicateOutlier(SensorData sensorData, OutlierLevel level) {
         Long sensorId = sensorData.getSensor().getId();
         Long dataTypeId = sensorData.getDataType().getId();
-        LocalDateTime timeThreshold = sensorData.getCreatedAt()
-                .minusMinutes(outlierSettingsService.getDuplicatePreventionMinutes());
+
+        Integer preventionMinutes = getPreventionMinutesByLevel(level);
+        LocalDateTime timeThreshold = sensorData.getCreatedAt().minusMinutes(preventionMinutes);
 
         List<OutlierLog> recentOutliers = outlierLogRepository
                 .findRecentOutlierBySensorAndDataTypeAndLevel(sensorId, dataTypeId, level, timeThreshold);
 
         return !recentOutliers.isEmpty();
+    }
+
+    private Integer getPreventionMinutesByLevel(OutlierLevel level) {
+        return switch (level) {
+            case DANGER -> outlierSettingsService.getDangerNotificationMinutes();
+            case CAUTION -> outlierSettingsService.getCautionNotificationMinutes();
+            default -> outlierSettingsService.getDuplicatePreventionMinutes();
+        };
     }
     
     public OutlierLog getOutlierLogById(Long outlierLogId, Long memberId) {

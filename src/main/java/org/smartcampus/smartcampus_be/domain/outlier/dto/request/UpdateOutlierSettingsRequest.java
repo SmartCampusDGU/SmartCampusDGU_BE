@@ -11,4 +11,10 @@ public class UpdateOutlierSettingsRequest {
 
     @Min(value = 1, message = "중복 방지 시간은 1분 이상이어야 합니다")
     private Integer duplicatePreventionMinutes;
+
+    @Min(value = 1, message = "위험 레벨 알림 주기는 1분 이상이어야 합니다")
+    private Integer dangerNotificationMinutes;
+
+    @Min(value = 1, message = "경고 레벨 알림 주기는 1분 이상이어야 합니다")
+    private Integer cautionNotificationMinutes;
 }
