@@ -287,13 +287,14 @@ public class OutlierService {
             String macAddress = (String) result[0];
             String roomNumber = (String) result[1];
             Long outlierCount = (Long) result[2];
-            Double averageDurationMinutes = (Double) result[3];
+            java.math.BigDecimal averageDurationBigDecimal = (java.math.BigDecimal) result[3];
+            Double averageDurationMinutes = averageDurationBigDecimal != null ? averageDurationBigDecimal.doubleValue() : 0.0;
 
             sensorSummaries.add(PeriodStatisticsResponse.SensorOutlierSummary.builder()
                     .macAddress(macAddress)
                     .roomNumber(roomNumber)
                     .outlierCount(outlierCount.intValue())
-                    .averageDurationMinutes(averageDurationMinutes != null ? averageDurationMinutes : 0.0)
+                    .averageDurationMinutes(averageDurationMinutes)
                     .build());
         }
 
@@ -302,16 +303,16 @@ public class OutlierService {
         for (Object[] result : environmentResults) {
             String indicator = (String) result[0];
             String unit = (String) result[1];
-            Double average = (Double) result[2];
-            Double maximum = (Double) result[3];
-            Double minimum = (Double) result[4];
+            java.math.BigDecimal averageBigDecimal = (java.math.BigDecimal) result[2];
+            java.math.BigDecimal maximumBigDecimal = (java.math.BigDecimal) result[3];
+            java.math.BigDecimal minimumBigDecimal = (java.math.BigDecimal) result[4];
 
             environmentStatistics.add(PeriodStatisticsResponse.EnvironmentStatistics.builder()
                     .indicator(indicator)
                     .unit(unit)
-                    .average(average != null ? average : 0.0)
-                    .maximum(maximum != null ? maximum : 0.0)
-                    .minimum(minimum != null ? minimum : 0.0)
+                    .average(averageBigDecimal != null ? averageBigDecimal.doubleValue() : 0.0)
+                    .maximum(maximumBigDecimal != null ? maximumBigDecimal.doubleValue() : 0.0)
+                    .minimum(minimumBigDecimal != null ? minimumBigDecimal.doubleValue() : 0.0)
                     .build());
         }
 
@@ -331,6 +332,7 @@ public class OutlierService {
                 .totalOutlierCount(totalOutlierCount.intValue())
                 .majorOutlierTypes(majorOutlierTypes)
                 .observationPeriod(observationPeriod)
+                .reportCreatedAt(LocalDateTime.now())
                 .sensorSummaries(sensorSummaries)
                 .environmentStatistics(environmentStatistics)
                 .actionRecords(actionRecords)
