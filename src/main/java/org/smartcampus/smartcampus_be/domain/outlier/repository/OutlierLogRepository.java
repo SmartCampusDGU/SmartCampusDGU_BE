@@ -136,4 +136,43 @@ public interface OutlierLogRepository extends JpaRepository<OutlierLog, Long> {
            "AND o.completedAt IS NOT NULL")
     List<OutlierLog> findMonitoringOutliersBySensorAndDataType(@Param("sensorId") Long sensorId,
                                                                @Param("dataTypeId") Long dataTypeId);
+
+    @Query("SELECT COUNT(o) FROM OutlierLog o " +
+           "WHERE o.createdAt BETWEEN :startDate AND :endDate")
+    Long countOutliersByPeriod(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT dt.name as dataTypeName, dt.unit as unit, COUNT(o) as count " +
+           "FROM OutlierLog o " +
+           "JOIN o.sensorData sd " +
+           "JOIN sd.dataType dt " +
+           "WHERE o.createdAt BETWEEN :startDate AND :endDate " +
+           "GROUP BY dt.id, dt.name, dt.unit " +
+           "ORDER BY COUNT(o) DESC")
+    List<Object[]> findOutlierTypeStatisticsByPeriod(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    @Query(value = "SELECT s.mac_address as macAddress, r.room_number as roomNumber, " +
+           "COUNT(o.id) as outlierCount, " +
+           "AVG(CASE WHEN o.completed_at IS NOT NULL " +
+           "    THEN TIMESTAMPDIFF(MINUTE, o.created_at, o.completed_at) " +
+           "    ELSE NULL END) as averageDurationMinutes " +
+           "FROM outlier_log o " +
+           "JOIN sensor_data sd ON o.sensor_data_id = sd.id " +
+           "JOIN sensor s ON sd.sensor_id = s.id " +
+           "JOIN room r ON s.room_id = r.id " +
+           "WHERE o.created_at BETWEEN :startDate AND :endDate " +
+           "GROUP BY s.id, s.mac_address, r.room_number " +
+           "ORDER BY COUNT(o.id) DESC", nativeQuery = true)
+    List<Object[]> findSensorOutlierSummaryByPeriod(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT o " +
+           "FROM OutlierLog o " +
+           "JOIN FETCH o.sensorData sd " +
+           "JOIN FETCH sd.sensor s " +
+           "JOIN FETCH s.room r " +
+           "JOIN FETCH sd.dataType dt " +
+           "LEFT JOIN FETCH o.member m " +
+           "WHERE o.completedAt IS NOT NULL " +
+           "AND o.createdAt BETWEEN :startDate AND :endDate " +
+           "ORDER BY o.completedAt DESC")
+    List<OutlierLog> findActionRecordsByPeriod(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 }

@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.smartcampus.smartcampus_be.domain.member.entity.Member;
 import org.smartcampus.smartcampus_be.domain.member.repository.MemberRepository;
 import org.smartcampus.smartcampus_be.domain.outlier.dto.request.OutlierSearchRequest;
+import org.smartcampus.smartcampus_be.domain.outlier.dto.request.PeriodStatisticsRequest;
 import org.smartcampus.smartcampus_be.domain.outlier.dto.request.UpdateOutlierStatusRequest;
+import org.smartcampus.smartcampus_be.domain.outlier.dto.response.PeriodStatisticsResponse;
 import org.smartcampus.smartcampus_be.domain.outlier.entity.*;
 import org.smartcampus.smartcampus_be.domain.outlier.repository.OutlierLogRepository;
 import org.smartcampus.smartcampus_be.domain.room.entity.RoomDataThreshold;
@@ -13,6 +15,7 @@ import org.smartcampus.smartcampus_be.domain.room.repository.RoomDataThresholdRe
 import org.smartcampus.smartcampus_be.domain.room.repository.RoomTypeDataThresholdRepository;
 import org.smartcampus.smartcampus_be.domain.sensor.entity.DataType;
 import org.smartcampus.smartcampus_be.domain.sensor.entity.SensorData;
+import org.smartcampus.smartcampus_be.domain.sensor.repository.SensorDataRepository;
 import org.smartcampus.smartcampus_be.global.exception.CustomException;
 import org.smartcampus.smartcampus_be.global.exception.ErrorType;
 import org.springframework.data.domain.Page;
@@ -21,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,6 +37,7 @@ public class OutlierService {
     private final RoomDataThresholdRepository roomDataThresholdRepository;
     private final RoomTypeDataThresholdRepository roomTypeDataThresholdRepository;
     private final MemberRepository memberRepository;
+    private final SensorDataRepository sensorDataRepository;
     private final OutlierSettingsService outlierSettingsService;
     
     @Transactional
@@ -247,5 +252,109 @@ public class OutlierService {
         if (!expiredOutliers.isEmpty()) {
             outlierLogRepository.deleteAll(expiredOutliers);
         }
+    }
+
+    public PeriodStatisticsResponse getPeriodStatistics(PeriodStatisticsRequest request) {
+        LocalDateTime startDate = request.getStartDate();
+        LocalDateTime endDate = request.getEndDate();
+
+        Long totalOutlierCount = outlierLogRepository.countOutliersByPeriod(startDate, endDate);
+
+        List<Object[]> outlierTypeResults = outlierLogRepository.findOutlierTypeStatisticsByPeriod(startDate, endDate);
+        List<PeriodStatisticsResponse.OutlierTypeStatistics> majorOutlierTypes = new ArrayList<>();
+        for (Object[] result : outlierTypeResults) {
+            String dataTypeName = (String) result[0];
+            String unit = (String) result[1];
+            Long count = (Long) result[2];
+            double percentage = totalOutlierCount > 0 ? (count.doubleValue() / totalOutlierCount) * 100 : 0;
+
+            majorOutlierTypes.add(PeriodStatisticsResponse.OutlierTypeStatistics.builder()
+                    .dataTypeName(dataTypeName)
+                    .unit(unit)
+                    .count(count.intValue())
+                    .percentage(percentage)
+                    .build());
+        }
+
+        PeriodStatisticsResponse.ObservationPeriod observationPeriod = PeriodStatisticsResponse.ObservationPeriod.builder()
+                .startDate(startDate)
+                .endDate(endDate)
+                .build();
+
+        List<Object[]> sensorResults = outlierLogRepository.findSensorOutlierSummaryByPeriod(startDate, endDate);
+        List<PeriodStatisticsResponse.SensorOutlierSummary> sensorSummaries = new ArrayList<>();
+        for (Object[] result : sensorResults) {
+            String macAddress = (String) result[0];
+            String roomNumber = (String) result[1];
+            Long outlierCount = (Long) result[2];
+            Double averageDurationMinutes = (Double) result[3];
+
+            sensorSummaries.add(PeriodStatisticsResponse.SensorOutlierSummary.builder()
+                    .macAddress(macAddress)
+                    .roomNumber(roomNumber)
+                    .outlierCount(outlierCount.intValue())
+                    .averageDurationMinutes(averageDurationMinutes != null ? averageDurationMinutes : 0.0)
+                    .build());
+        }
+
+        List<Object[]> environmentResults = sensorDataRepository.findEnvironmentStatisticsByPeriod(startDate, endDate);
+        List<PeriodStatisticsResponse.EnvironmentStatistics> environmentStatistics = new ArrayList<>();
+        for (Object[] result : environmentResults) {
+            String indicator = (String) result[0];
+            String unit = (String) result[1];
+            Double average = (Double) result[2];
+            Double maximum = (Double) result[3];
+            Double minimum = (Double) result[4];
+
+            environmentStatistics.add(PeriodStatisticsResponse.EnvironmentStatistics.builder()
+                    .indicator(indicator)
+                    .unit(unit)
+                    .average(average != null ? average : 0.0)
+                    .maximum(maximum != null ? maximum : 0.0)
+                    .minimum(minimum != null ? minimum : 0.0)
+                    .build());
+        }
+
+        List<OutlierLog> actionLogs = outlierLogRepository.findActionRecordsByPeriod(startDate, endDate);
+        List<PeriodStatisticsResponse.ActionRecord> actionRecords = new ArrayList<>();
+        for (OutlierLog log : actionLogs) {
+            actionRecords.add(PeriodStatisticsResponse.ActionRecord.builder()
+                    .actionDateTime(log.getCompletedAt())
+                    .actionStatus(log.getActionStatus().getDescription())
+                    .memberName(log.getMember() != null ? log.getMember().getName() : "미지정")
+                    .roomNumber(log.getSensorData().getSensor().getRoom().getRoomNumber())
+                    .dataTypeName(log.getSensorData().getDataType().getName())
+                    .build());
+        }
+
+        return PeriodStatisticsResponse.builder()
+                .totalOutlierCount(totalOutlierCount.intValue())
+                .majorOutlierTypes(majorOutlierTypes)
+                .observationPeriod(observationPeriod)
+                .sensorSummaries(sensorSummaries)
+                .environmentStatistics(environmentStatistics)
+                .actionRecords(actionRecords)
+                .build();
+    }
+
+    private double calculateAverageDuration(LocalDateTime startDate, LocalDateTime endDate) {
+        List<OutlierLog> completedOutliers = outlierLogRepository.findActionRecordsByPeriod(startDate, endDate);
+
+        if (completedOutliers.isEmpty()) {
+            return 0.0;
+        }
+
+        double totalDuration = 0.0;
+        int count = 0;
+
+        for (OutlierLog log : completedOutliers) {
+            if (log.getCompletedAt() != null) {
+                long durationMinutes = java.time.Duration.between(log.getCreatedAt(), log.getCompletedAt()).toMinutes();
+                totalDuration += durationMinutes;
+                count++;
+            }
+        }
+
+        return count > 0 ? totalDuration / count : 0.0;
     }
 }

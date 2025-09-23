@@ -7,10 +7,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.smartcampus.smartcampus_be.domain.outlier.dto.request.OutlierSearchRequest;
+import org.smartcampus.smartcampus_be.domain.outlier.dto.request.PeriodStatisticsRequest;
 import org.smartcampus.smartcampus_be.domain.outlier.dto.request.UpdateOutlierStatusRequest;
 import org.smartcampus.smartcampus_be.domain.outlier.dto.response.OutlierLogResponse;
 import org.smartcampus.smartcampus_be.domain.outlier.dto.response.OutlierStatsResponse;
 import org.smartcampus.smartcampus_be.domain.outlier.dto.response.PagingOutlierLogResponse;
+import org.smartcampus.smartcampus_be.domain.outlier.dto.response.PeriodStatisticsResponse;
 import org.smartcampus.smartcampus_be.domain.outlier.entity.OutlierLevel;
 import org.smartcampus.smartcampus_be.domain.outlier.entity.OutlierLog;
 import org.smartcampus.smartcampus_be.domain.outlier.service.OutlierService;
@@ -103,6 +105,21 @@ public class OutlierController {
 
         OutlierLog outlierLog = outlierService.updateOutlierStatus(outlierLogId, memberId, request);
         OutlierLogResponse response = OutlierLogResponse.from(outlierLog);
+        return ApiResponse.success(SuccessType.PROCESS_SUCCESS, response);
+    }
+
+    @Operation(summary = "기간별 통계 조회", description = "지정된 기간의 이상치 통계를 조회합니다.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "기간별 통계 조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 실패")
+    })
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/statistics")
+    public ApiResponse<PeriodStatisticsResponse> getPeriodStatistics(
+            @Parameter(description = "통계 조회 기간 설정") @ModelAttribute @Valid PeriodStatisticsRequest request) {
+
+        PeriodStatisticsResponse response = outlierService.getPeriodStatistics(request);
         return ApiResponse.success(SuccessType.PROCESS_SUCCESS, response);
     }
 }
