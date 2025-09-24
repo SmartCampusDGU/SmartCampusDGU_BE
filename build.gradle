@@ -46,6 +46,10 @@ dependencies {
 
 	// MQTT
 	implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5'
+
+	// Apache POI for Word document generation
+	implementation 'org.apache.poi:poi-ooxml:5.2.4'
+	implementation 'org.apache.poi:poi-scratchpad:5.2.4'
 }
 
 tasks.named('test') {

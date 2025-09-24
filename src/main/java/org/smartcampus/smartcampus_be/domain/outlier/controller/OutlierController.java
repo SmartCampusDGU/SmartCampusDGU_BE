@@ -16,14 +16,21 @@ import org.smartcampus.smartcampus_be.domain.outlier.dto.response.PeriodStatisti
 import org.smartcampus.smartcampus_be.domain.outlier.entity.OutlierLevel;
 import org.smartcampus.smartcampus_be.domain.outlier.entity.OutlierLog;
 import org.smartcampus.smartcampus_be.domain.outlier.service.OutlierService;
+import org.smartcampus.smartcampus_be.domain.outlier.service.ReportGenerationService;
 import org.smartcampus.smartcampus_be.global.response.ApiResponse;
 import org.smartcampus.smartcampus_be.global.response.SuccessType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.time.format.DateTimeFormatter;
 
 @Tag(name = "이상치 관리", description = "센서 이상치 감지 및 관리 API")
 @RestController
@@ -32,6 +39,7 @@ import org.springframework.web.bind.annotation.*;
 public class OutlierController {
     
     private final OutlierService outlierService;
+    private final ReportGenerationService reportGenerationService;
     
     @Operation(summary = "이상치 목록 조회", description = "센서에서 감지된 모든 이상치 목록을 페이징하여 조회합니다.")
     @ApiResponses(value = {
@@ -121,5 +129,36 @@ public class OutlierController {
 
         PeriodStatisticsResponse response = outlierService.getPeriodStatistics(request);
         return ApiResponse.success(SuccessType.PROCESS_SUCCESS, response);
+    }
+
+    @Operation(summary = "기간별 통계 보고서 다운로드", description = "지정된 기간의 이상치 통계를 문서로 다운로드합니다.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "보고서 다운로드 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 실패"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/report")
+    public ResponseEntity<byte[]> downloadStatisticsReport(
+            @Parameter(description = "통계 조회 기간 설정") @ModelAttribute @Valid PeriodStatisticsRequest request) throws IOException {
+
+        PeriodStatisticsResponse statisticsData = outlierService.getPeriodStatistics(request);
+        byte[] reportBytes = reportGenerationService.generatePeriodStatisticsReport(statisticsData);
+
+        String filename = "smartcampus-report-" +
+                statisticsData.getObservationPeriod().getStartDate().format(DateTimeFormatter.ofPattern("yyyyMMdd")) +
+                "-" +
+                statisticsData.getObservationPeriod().getEndDate().format(DateTimeFormatter.ofPattern("yyyyMMdd")) +
+                ".docx";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentDispositionFormData("attachment", filename);
+        headers.setContentLength(reportBytes.length);
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(reportBytes);
     }
 }

@@ -32,6 +32,8 @@ public class PeriodStatisticsResponse {
     public static class ObservationPeriod {
         private final LocalDateTime startDate;
         private final LocalDateTime endDate;
+        private final long totalDurationMinutes;
+        private final double averageDurationMinutes;
     }
 
     @Getter

@@ -18,6 +18,10 @@ public interface SensorDataRepository extends JpaRepository<SensorData, Long> {
            "JOIN data_type dt ON sd.data_type_id = dt.id " +
            "WHERE sd.created_at BETWEEN :startDate AND :endDate " +
            "AND sd.value REGEXP '^[0-9]+\\.?[0-9]*$' " +
+           "AND dt.name NOT LIKE '%connection%' " +
+           "AND dt.name NOT LIKE '%missed%' " +
+           "AND dt.name NOT LIKE '%error%' " +
+           "AND dt.name NOT LIKE '%status%' " +
            "GROUP BY dt.id, dt.name, dt.unit " +
            "ORDER BY dt.name", nativeQuery = true)
     List<Object[]> findEnvironmentStatisticsByPeriod(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
