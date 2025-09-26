@@ -75,7 +75,7 @@ public class SecurityConfig {
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*")); // Authorization 포함
         config.setAllowCredentials(true); // 인증 정보 허용
-        config.exposedHeaders("Content-Disposition");
+        config.setExposedHeaders(List.of("Content-Disposition"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
