@@ -10,4 +10,6 @@ public class MemberListResponseDto {
     private String username;
     private String name;
     private String description;
+    private String phoneNumber;
+    private Boolean notificationEnabled;
 }

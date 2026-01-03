@@ -34,21 +34,36 @@ public class Member extends BaseTimeEntity {
     @Column(length = 50)
     private String description; // 설명
 
+    @Column(length = 20)
+    private String phoneNumber; // 전화번호 (01012345678)
+
+    @Column(nullable = false)
+    private Boolean notificationEnabled = true; // 알림 수신 여부
+
     @Builder
-    public Member(String username, String password, String name, Role role, String description) {
+    public Member(String username, String password, String name, Role role, String description,
+                  String phoneNumber, Boolean notificationEnabled) {
         this.username = username;
         this.password = password;
         this.name = name;
         this.role = role;
         this.description = description;
+        this.phoneNumber = phoneNumber;
+        this.notificationEnabled = notificationEnabled != null ? notificationEnabled : true;
     }
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OutlierLog> outlierLogs = new ArrayList<>();
 
-    public void update(String password, String name, String description) {
+    public void update(String password, String name, String description, String phoneNumber, Boolean notificationEnabled) {
         this.password = password;
         this.name = name;
         this.description = description;
+        if (phoneNumber != null) {
+            this.phoneNumber = phoneNumber;
+        }
+        if (notificationEnabled != null) {
+            this.notificationEnabled = notificationEnabled;
+        }
     }
 }

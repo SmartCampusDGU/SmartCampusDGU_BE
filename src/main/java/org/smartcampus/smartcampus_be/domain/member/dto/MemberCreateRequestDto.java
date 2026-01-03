@@ -25,4 +25,12 @@ public class MemberCreateRequestDto {
     private String name;
 
     private String description;
+
+    @Pattern(
+        regexp = "^01[0-9]{8,9}$",
+        message = "전화번호는 01로 시작하는 10~11자리 숫자여야 합니다. (하이픈 제외)"
+    )
+    private String phoneNumber;  // 전화번호 (선택)
+
+    private Boolean notificationEnabled;  // 알림 수신 여부 (선택, 기본값 true)
 }

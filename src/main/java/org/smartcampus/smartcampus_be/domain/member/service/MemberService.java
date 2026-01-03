@@ -57,6 +57,8 @@ public class MemberService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .name(request.getName())
                 .description(request.getDescription())
+                .phoneNumber(request.getPhoneNumber())
+                .notificationEnabled(request.getNotificationEnabled())
                 .role(Role.ADMIN) //등록시 관리자 권한 주도록 고정
                 .build();
 
@@ -76,7 +78,9 @@ public class MemberService {
         member.update(
                 passwordEncoder.encode(request.getPassword()),
                 request.getName(),
-                request.getDescription()
+                request.getDescription(),
+                request.getPhoneNumber(),
+                request.getNotificationEnabled()
         );
     }
 
@@ -106,7 +110,9 @@ public class MemberService {
                         member.getId(),
                         member.getUsername(),
                         member.getName(),
-                        member.getDescription()
+                        member.getDescription(),
+                        member.getPhoneNumber(),
+                        member.getNotificationEnabled()
                 ))
                 .collect(Collectors.toList());
     }
@@ -119,7 +125,9 @@ public class MemberService {
                 member.getId(),
                 member.getUsername(),
                 member.getName(),
-                member.getDescription()
+                member.getDescription(),
+                member.getPhoneNumber(),
+                member.getNotificationEnabled()
         );
     }
 
