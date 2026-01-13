@@ -201,10 +201,7 @@ public class OutlierService {
         Long dataTypeId = sensorData.getDataType().getId();
 
         List<OutlierLog> monitoringOutliers = outlierLogRepository
-                .findMonitoringOutliersBySensorAndDataType(sensorId, dataTypeId)
-                .stream()
-                .filter(outlier -> !outlier.isMonitoringExpired(outlierSettingsService.getMonitoringDurationMinutes()))
-                .toList();
+                .findMonitoringOutliersBySensorAndDataType(sensorId, dataTypeId);
 
         for (OutlierLog monitoringOutlier : monitoringOutliers) {
             if (monitoringOutlier.isMonitoringExpired(outlierSettingsService.getMonitoringDurationMinutes())) {
