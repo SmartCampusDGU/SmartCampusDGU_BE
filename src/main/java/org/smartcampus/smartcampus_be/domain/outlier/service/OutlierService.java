@@ -3,6 +3,7 @@ package org.smartcampus.smartcampus_be.domain.outlier.service;
 import lombok.RequiredArgsConstructor;
 import org.smartcampus.smartcampus_be.domain.member.entity.Member;
 import org.smartcampus.smartcampus_be.domain.member.repository.MemberRepository;
+import org.smartcampus.smartcampus_be.domain.notification.service.NotificationService;
 import org.smartcampus.smartcampus_be.domain.outlier.dto.request.OutlierSearchRequest;
 import org.smartcampus.smartcampus_be.domain.outlier.dto.request.PeriodStatisticsRequest;
 import org.smartcampus.smartcampus_be.domain.outlier.dto.request.UpdateOutlierStatusRequest;
@@ -39,7 +40,8 @@ public class OutlierService {
     private final MemberRepository memberRepository;
     private final SensorDataRepository sensorDataRepository;
     private final OutlierSettingsService outlierSettingsService;
-    
+    private final NotificationService notificationService;
+
     @Transactional
     public void detectAndSaveOutlier(SensorData sensorData) {
         OutlierLevel level = detectOutlierLevel(sensorData);
@@ -63,6 +65,9 @@ public class OutlierService {
                     .build();
 
             outlierLogRepository.save(outlierLog);
+
+            // 알림톡 발송
+            notificationService.sendOutlierAlert(outlierLog);
         } else {
             // 데이터가 양호할 때 모니터링 중인 완료된 이상치 로그 삭제
             deleteMonitoringOutliersIfSafe(sensorData);
@@ -219,6 +224,9 @@ public class OutlierService {
                         .build();
 
                 outlierLogRepository.save(newOutlierLog);
+
+                // 모니터링 기간 경과 후 재발한 경우 알림 발송
+                notificationService.sendOutlierAlert(newOutlierLog);
             }
         }
     }
