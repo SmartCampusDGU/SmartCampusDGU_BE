@@ -77,6 +77,12 @@ public class NotificationService {
 
             AlimTalkRequest request = buildRequest(recipients, outlierLog);
 
+            // 디버깅용 로그 (배포 시 제거 또는 debug 레벨로 변경)
+            log.info("알림톡 API 호출 - URL: {}", apiUrl);
+            log.info("인증 정보 - apiKey: {}..., servNo: {}",
+                    apiKey != null && apiKey.length() > 10 ? apiKey.substring(0, 10) : "null",
+                    servNo);
+
             AlimTalkResponse response = restClient.post()
                     .uri(apiUrl)
                     .header("Content-Type", "application/json; charset=utf-8")
