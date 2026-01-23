@@ -28,6 +28,9 @@ public class DataType extends BaseTimeEntity {
     @Column(length = 10, nullable = false)
     private String unit;
 
+    @Column(length = 20, nullable = false)
+    private String displayName;
+
     @Builder
     public DataType(String name, String unit) {
         this.name = name;
