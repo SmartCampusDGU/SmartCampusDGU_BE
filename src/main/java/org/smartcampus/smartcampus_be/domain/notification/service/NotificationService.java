@@ -137,7 +137,7 @@ public class NotificationService {
                 outlierLog.getLevel().getDescription(),
                 member.getName(),
                 sensorData.getSensor().getRoom().getRoomNumber(),
-                sensorData.getDataType().getName(),
+                sensorData.getDataType().getDisplayName(),
                 outlierLog.getValue() + sensorData.getDataType().getUnit(),
                 sensorData.getCreatedAt().format(formatter)
         );
