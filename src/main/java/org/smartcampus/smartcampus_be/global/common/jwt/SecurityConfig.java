@@ -39,7 +39,8 @@ public class SecurityConfig {
 
     // 인증 없이 접근 가능한 URI
     private static final String[] AUTH_WHITE_LIST = {
-            "/", "/swagger/**", "/swagger-ui/**", "/v3/api-docs/**", "/api/login"
+            "/", "/swagger/**", "/swagger-ui/**", "/v3/api-docs/**", "/api/login",
+            "/api/action/**"  // 알림톡 조치 링크 (토큰 기반 인증)
     };
 
     @Bean

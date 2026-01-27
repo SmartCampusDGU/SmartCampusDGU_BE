@@ -19,6 +19,8 @@ public enum ErrorType {
     SENSOR_NAME_REQUIRED(HttpStatus.BAD_REQUEST, "센서 이름이 필요합니다."),
     THRESHOLDS_REQUIRED(HttpStatus.BAD_REQUEST, "임계값(thresholds)이 필요합니다."),
     MISSING_TOKEN(HttpStatus.BAD_REQUEST, "토큰이 없습니다."),
+    TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "토큰이 만료되었습니다."),
+    TOKEN_ALREADY_USED(HttpStatus.BAD_REQUEST, "이미 사용된 토큰입니다."),
 
     /**
      * HTTP 401 (UNAUTHORIZED)
@@ -40,6 +42,7 @@ public enum ErrorType {
     ROOM_TYPE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 공간유형을 찾을 수 없습니다."),
     DATA_TYPE_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 데이터 타입입니다."),
     SENSOR_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 센서입니다."),
+    TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "토큰을 찾을 수 없습니다."),
 
     /**
      * HTTP 409 (CONFLICT)

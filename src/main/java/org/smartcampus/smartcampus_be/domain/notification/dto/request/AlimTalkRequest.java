@@ -47,30 +47,30 @@ public class AlimTalkRequest {
 //        @JsonProperty("fail_over_msg_content")
 //        private String failOverMsgContent;
 
-//        @JsonProperty("talk_btn_link1")
-//        private ButtonLink talkBtnLink1;
+        @JsonProperty("talk_btn_link1")
+        private ButtonLink talkBtnLink1;
 
-//        @JsonProperty("talk_btn_link2")
-//        private ButtonLink talkBtnLink2;
+        @JsonProperty("talk_btn_link2")
+        private ButtonLink talkBtnLink2;
 
-//        @JsonProperty("talk_btn_link3")
-//        private ButtonLink talkBtnLink3;
+        @JsonProperty("talk_btn_link3")
+        private ButtonLink talkBtnLink3;
     }
 
-//    @Getter
-//    @Builder
-//    public static class ButtonLink {
-//
-//        @JsonProperty("name")
-//        private String name;
-//
-//        @JsonProperty("type")
-//        private String type;  // WL: 웹링크, AL: 앱링크
-//
-//        @JsonProperty("url_mobile")
-//        private String urlMobile;
-//
-//        @JsonProperty("url_pc")
-//        private String urlPc;
-//    }
+    @Getter
+    @Builder
+    public static class ButtonLink {
+
+        @JsonProperty("name")
+        private String name;
+
+        @JsonProperty("type")
+        private String type;  // WL: 웹링크, AL: 앱링크
+
+        @JsonProperty("url_mobile")
+        private String urlMobile;
+
+        @JsonProperty("url_pc")
+        private String urlPc;
+    }
 }

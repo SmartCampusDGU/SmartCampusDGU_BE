@@ -2,10 +2,12 @@ package org.smartcampus.smartcampus_be.domain.notification.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.smartcampus.smartcampus_be.domain.actiontoken.service.ActionTokenService;
 import org.smartcampus.smartcampus_be.domain.member.entity.Member;
 import org.smartcampus.smartcampus_be.domain.member.repository.MemberRepository;
 import org.smartcampus.smartcampus_be.domain.notification.dto.request.AlimTalkRequest;
 import org.smartcampus.smartcampus_be.domain.notification.dto.response.AlimTalkResponse;
+import org.smartcampus.smartcampus_be.domain.outlier.entity.ActionStatus;
 import org.smartcampus.smartcampus_be.domain.outlier.entity.OutlierLevel;
 import org.smartcampus.smartcampus_be.domain.outlier.entity.OutlierLog;
 import org.smartcampus.smartcampus_be.domain.sensor.entity.SensorData;
@@ -24,6 +26,7 @@ public class NotificationService {
 
     private final RestClient restClient;
     private final MemberRepository memberRepository;
+    private final ActionTokenService actionTokenService;
 
     @Value("${ustra.alimtalk.api-url}")
     private String apiUrl;
@@ -152,11 +155,31 @@ public class NotificationService {
         for (Member member : members) {
             String message = buildAlertMessage(outlierLog, member);
 
+            // 각 수신자별 토큰 생성
+            String token = actionTokenService.createToken(outlierLog, member);
+
+            // 3개의 조치 버튼 링크 생성
+            AlimTalkRequest.ButtonLink btnPlanned = buildButtonLink(
+                    "조치예정",
+                    actionTokenService.buildActionUrl(token, ActionStatus.PLANNED)
+            );
+            AlimTalkRequest.ButtonLink btnInProgress = buildButtonLink(
+                    "조치중",
+                    actionTokenService.buildActionUrl(token, ActionStatus.IN_PROGRESS)
+            );
+            AlimTalkRequest.ButtonLink btnCompleted = buildButtonLink(
+                    "조치완료",
+                    actionTokenService.buildActionUrl(token, ActionStatus.COMPLETED)
+            );
+
             AlimTalkRequest.ReceiverInfo receiverInfo = AlimTalkRequest.ReceiverInfo.builder()
                     .phoneNumber(member.getPhoneNumber())
                     .msgType("KA01")  // 알림톡 일반
                     .tmplCd(templateCode)
                     .talkContent(message)
+                    .talkBtnLink1(btnPlanned)
+                    .talkBtnLink2(btnInProgress)
+                    .talkBtnLink3(btnCompleted)
 //                    .useFailOver("N")  // 실패 시 문자 전환
 //                    .failOverType("MS02")  // LMS로 전환
 //                    .failOverMsgContent(message)  // 동일 내용으로 전환
@@ -170,6 +193,18 @@ public class NotificationService {
                 .sendKey(sendKey)
                 .receiverInfo(receiverInfoList)
                 .testYn(testMode ? "Y" : "N")
+                .build();
+    }
+
+    /**
+     * 버튼 링크 생성
+     */
+    private AlimTalkRequest.ButtonLink buildButtonLink(String name, String url) {
+        return AlimTalkRequest.ButtonLink.builder()
+                .name(name)
+                .type("WL")  // 웹링크
+                .urlMobile(url)
+                .urlPc(url)
                 .build();
     }
 }
